@@ -114,9 +114,32 @@ export default function FractionClimbGame() {
         onReplay={resetGame}
       />
 
-      <p style={{ marginTop: 10, fontSize: 11, color: '#334455', letterSpacing: 1 }}>
-        FRACTION CLIMBER · GRADE 4 MATH · UNLIKE FRACTIONS
-      </p>
+      <footer
+        style={{
+          marginTop:      24,
+          padding:        '12px 24px',
+          background:     'rgba(0, 20, 40, 0.4)',
+          backdropFilter: 'blur(8px)',
+          borderRadius:   30,
+          border:         '1px solid rgba(26, 74, 106, 0.3)',
+          boxShadow:      '0 4px 15px rgba(0,0,0,0.3)',
+        }}
+      >
+        <p 
+          style={{ 
+            fontSize:      13, 
+            color:         '#4a6a8a', 
+            letterSpacing: 2,
+            fontWeight:    800,
+            textTransform: 'uppercase',
+            margin:        0,
+            textAlign:     'center',
+            textShadow:    '0 1px 2px rgba(0,0,0,0.5)',
+          }}
+        >
+          FRACTION CLIMBER <span style={{ color: '#1de9b6', margin: '0 8px' }}>•</span> GRADE 4 MATH <span style={{ color: '#1de9b6', margin: '0 8px' }}>•</span> UNLIKE FRACTIONS
+        </p>
+      </footer>
     </div>
   );
 }

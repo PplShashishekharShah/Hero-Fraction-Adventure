@@ -23,7 +23,7 @@ function ScrollingBuilding({ src, side }) {
         height:         VP_H * 2,
         zIndex:         5,
         pointerEvents:  'none',
-        animation:      'buildingClimbScroll 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+        animation:      'buildingClimbScroll 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards',
         willChange:     'transform',
       }}
     >
@@ -84,7 +84,7 @@ export default function GameViewport({
       if (oldLower.length > 0) {
         setExitingAnchors(oldLower);
         // Clear them after animation finishes
-        setTimeout(() => setExitingAnchors([]), 1100);
+        setTimeout(() => setExitingAnchors([]), 2200);
       }
     }
     prevRoundIndex.current = roundIndex;

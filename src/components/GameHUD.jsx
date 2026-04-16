@@ -28,13 +28,14 @@ export default function GameHUD({ progress, modeLabel }) {
           style={{
             background:   '#0a2a40',
             border:       '1px solid #1a6a8a',
-            borderRadius: 8,
-            padding:      '4px 12px',
-            fontSize:     12,
-            color:        '#7ee8ff',
-            fontWeight:   700,
+            borderRadius: 10,
+            padding:      '6px 16px',
+            fontSize:     14,
+            color:        '#b2f2ff',
+            fontWeight:   900,
             cursor:       'default',
             whiteSpace:   'nowrap',
+            boxShadow:    '0 0 10px rgba(126, 232, 255, 0.2)',
           }}
         >
           ← GRADE 4
@@ -47,14 +48,16 @@ export default function GameHUD({ progress, modeLabel }) {
         {/* Mode label */}
         <div
           style={{
-            background:   '#0a2a40',
-            border:       '1px solid #1a6a8a',
-            borderRadius: 8,
-            padding:      '4px 10px',
-            fontSize:     11,
-            color:        '#aaddff',
-            fontWeight:   600,
+            background:   'rgba(10, 42, 64, 0.8)',
+            border:       '1px solid #1de9b6',
+            borderRadius: 10,
+            padding:      '6px 14px',
+            fontSize:     13,
+            color:        '#1de9b6',
+            fontWeight:   800,
             whiteSpace:   'nowrap',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
           }}
         >
           {modeLabel}
@@ -69,13 +72,14 @@ export default function GameHUD({ progress, modeLabel }) {
           background:  '#001a30',
           borderLeft:  '1px solid #1a4a6a',
           borderRight: '1px solid #1a4a6a',
-          padding:     '5px 18px',
+          padding:     '10px 18px',
           textAlign:   'center',
+          boxShadow:   'inset 0 0 20px rgba(0,0,0,0.5)',
         }}
       >
-        <span style={{ fontSize: 13, color: '#aaddff', fontWeight: 600 }}>
+        <span style={{ fontSize: 16, color: '#e0f4ff', fontWeight: 700, letterSpacing: 0.5 }}>
           🕸️ Tap the anchor with the{' '}
-          <strong style={{ color: '#ffe740' }}>GREATER</strong> fraction to climb!
+          <strong style={{ color: '#ffe740', fontSize: 18, textShadow: '0 0 8px #ffe74088' }}>GREATER</strong> fraction to climb!
         </span>
       </div>
     </>

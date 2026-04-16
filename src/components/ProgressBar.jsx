@@ -5,13 +5,14 @@ export default function ProgressBar({ progress, total }) {
   const pct = Math.round((progress / total) * 100);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <span
         style={{
-          fontSize:   12,
+          fontSize:   15,
           color:      '#7ee8ff',
-          fontWeight: 700,
+          fontWeight: 900,
           whiteSpace: 'nowrap',
+          letterSpacing: 1,
         }}
       >
         CLIMB {progress}/{total}
@@ -20,26 +21,28 @@ export default function ProgressBar({ progress, total }) {
       <div
         style={{
           flex:         1,
-          height:       12,
-          background:   '#0a1a2a',
-          borderRadius: 8,
-          border:       '1px solid #1a4a6a',
+          height:       24,
+          background:   'rgba(0,0,0,0.4)',
+          borderRadius: 12,
+          border:       '2px solid #1a4a6a',
           overflow:     'hidden',
+          boxShadow:    'inset 0 2px 10px rgba(0,0,0,0.8)',
         }}
       >
         <div
           style={{
             height:       '100%',
             width:        `${pct}%`,
-            background:   'linear-gradient(90deg, #1de9b6, #7ee8ff)',
-            borderRadius: 8,
-            transition:   'width 0.5s ease',
-            boxShadow:    '0 0 8px #1de9b666',
+            background:   'linear-gradient(90deg, #1de9b6, #00b0ff, #1de9b6)',
+            backgroundSize: '200% 100%',
+            borderRadius: 12,
+            transition:   'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow:    '0 0 15px rgba(29, 233, 182, 0.6)',
           }}
         />
       </div>
 
-      <span style={{ fontSize: 12, color: '#7ee8ff', fontWeight: 700 }}>
+      <span style={{ fontSize: 16, color: '#1de9b6', fontWeight: 900, width: 45 }}>
         {pct}%
       </span>
     </div>

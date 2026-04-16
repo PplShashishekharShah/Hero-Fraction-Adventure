@@ -102,6 +102,15 @@ body {
   100% { transform: translateY(295px);  opacity: 0; }
 }
 
+/* Apply the timings to the components via these classes or directly in styles */
+.anchor-descend {
+  animation: anchorDescend 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+}
+
+.anchor-exit {
+  animation: anchorExitDown 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+}
+
 /* ─── Anchor idle float ─────────────────────────────────────────────────────── */
 @keyframes floatAnchor {
   0%, 100% { transform: translateY(0); }
