@@ -18,31 +18,30 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Building Scroll (downward) — gives upward climb feel ─────────────────── */
-/*
-   Container height = 2 × VP_H.
-   At 0%  → translateY(-50%) shifts container up by VP_H  → bottom image fills viewport.
-   At 100%→ translateY(0)    → no shift               → top image fills viewport.
-   Both images are identical so the loop is seamless.
-*/
-@keyframes buildingScroll {
-  0%   { transform: translateY(-50%); }
-  100% { transform: translateY(0);    }
+/* ─── Building Climb Scroll (triggered once per correct climb) ──────────────
+   Container is 2 × VP_H tall.
+   Animation: translateY(-50%) → translateY(0).
+   Increased duration in component for a more cinematic feel.                */
+@keyframes buildingClimbScroll {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0);    }
 }
 
-/* ─── Anchor Pads Spawn (slide + fade from above) ──────────────────────────── */
+/* ─── Anchor Pads — spawn from above the screen top ────────────────────────── */
+/* Softened the spawn path for a more fluid entrance                          */
 @keyframes anchorSpawn {
-  0%   { transform: translateY(-70px); opacity: 0; }
-  60%  { opacity: 1; }
+  0%   { transform: translateY(-350px); opacity: 0; }
+  20%  { opacity: 0; }
   100% { transform: translateY(0);      opacity: 1; }
 }
 
-/* ─── Hero animations ──────────────────────────────────────────────────────── */
+/* ─── Anchor idle float ─────────────────────────────────────────────────────── */
 @keyframes floatAnchor {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-6px); }
 }
 
+/* ─── Hero animations ──────────────────────────────────────────────────────── */
 @keyframes heroBounce {
   0%   { transform: scaleY(1) scaleX(1); }
   30%  { transform: scaleY(0.85) scaleX(1.15); }

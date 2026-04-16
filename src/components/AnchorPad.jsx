@@ -43,10 +43,11 @@ export default function AnchorPad({ x, y, n, d, state, selectable, onClick }) {
         zIndex:        20,
         filter:        glow ? `drop-shadow(${glow})` : 'none',
         transition:    'filter 0.2s',
+        willChange:    'transform, opacity',
         /* spawn from top once, then float if selectable */
         animation:     selectable
-          ? 'anchorSpawn 0.55s cubic-bezier(0.34,1.56,0.64,1) both, floatAnchor 2.2s ease-in-out infinite 0.55s'
-          : 'anchorSpawn 0.55s cubic-bezier(0.34,1.56,0.64,1) both',
+          ? 'anchorSpawn 1.1s cubic-bezier(0.25, 1, 0.5, 1) both, floatAnchor 2.2s ease-in-out infinite 1.1s'
+          : 'anchorSpawn 1.1s cubic-bezier(0.25, 1, 0.5, 1) both',
       }}
     >
       {/* Fraction plate — sits directly above anchor with no gap */}

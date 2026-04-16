@@ -5,27 +5,27 @@ import WebLine       from './WebLine';
 import FeedbackToast from './FeedbackToast';
 import WinScreen     from './WinScreen';
 
-// ─── Scrolling building strip ─────────────────────────────────────────────────
-// Two identical images stacked = 2 × VP_H tall.
-// CSS buildingScroll animates translateY from -50% → 0, creating a seamless
-// downward scroll (hero feels like it is climbing upward).
+// ─── Building strip (scroll triggered per climb) ───────────────────────────
+// Container is 2 × VP_H, initially rendered at translateY(-50%) (via keyframe
+// `from`). On each mount (caused by scrollKey change), the animation plays
+// once: translateY(-50%) → translateY(0), creating a downward scroll feel.
+// `forwards` fill-mode keeps end state so buildings don't snap back.
 function ScrollingBuilding({ src, side }) {
   const sideStyle = side === 'left' ? { left: 0 } : { right: 0 };
   return (
     <div
       style={{
-        position:      'absolute',
+        position:       'absolute',
         ...sideStyle,
-        top:           0,
-        width:         170,
-        height:        VP_H * 2,   // two-image stack
-        zIndex:        5,
-        pointerEvents: 'none',
-        animation:     'buildingScroll 7s linear infinite',
-        willChange:    'transform',
+        top:            0,
+        width:          180,
+        height:         VP_H * 2,
+        zIndex:         5,
+        pointerEvents:  'none',
+        animation:      'buildingClimbScroll 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+        willChange:     'transform',
       }}
     >
-      {/* Top image — enters viewport as animation approaches 100% */}
       <img
         src={src}
         alt=""
@@ -37,7 +37,6 @@ function ScrollingBuilding({ src, side }) {
           display:        'block',
         }}
       />
-      {/* Bottom image — visible at animation start */}
       <img
         src={src}
         alt=""
@@ -54,13 +53,6 @@ function ScrollingBuilding({ src, side }) {
 }
 
 // ─── GameViewport ─────────────────────────────────────────────────────────────
-/**
- * Receives all visual state from useGameLogic via FractionClimbGame.
- * No game logic lives here — pure rendering.
- *
- * Extra prop: showRooftop — renders rooftop layer during intro round only.
- * roundIndex is used to key anchor pads so spawn animation re-fires each round.
- */
 export default function GameViewport({
   round,
   roundIndex,
@@ -74,6 +66,7 @@ export default function GameViewport({
   inputLocked,
   won,
   showRooftop,
+  scrollKey,      // increments on each correct climb → re-keys buildings
   onAnchorClick,
   onReplay,
 }) {
@@ -105,43 +98,38 @@ export default function GameViewport({
         }}
       />
 
-      {/* ── Layer 2: Rooftop start platform (intro round only) ── */}
+      {/* ── Layer 2: Rooftop — visible only during intro round ──
+           Centred at the viewport bottom so character appears to stand on it.
+           zIndex 4 puts it above bg but below buildings and game elements.    */}
       {showRooftop && (
         <img
           src={ASSETS.rooftop}
           alt=""
           style={{
-            position:       'absolute',
-            bottom:         0,
-            left:           0,
-            width:          '100%',
-            height:         160,
-            objectFit:      'cover',
-            objectPosition: 'center top',
-            zIndex:         3,
-            pointerEvents:  'none',
+            position:      'absolute',
+            bottom:        0,
+            left:          '50%',
+            transform:     'translateX(-50%)',
+            width:         '84%',
+            height:        'auto',
+            zIndex:        4,
+            pointerEvents: 'none',
           }}
         />
       )}
 
-      {/* ── Layer 3: Scrolling left building ── */}
-      <ScrollingBuilding src={ASSETS.leftBuilding}  side="left"  />
+      {/* ── Layer 3: Left building — re-keyed per climb to replay scroll ── */}
+      <ScrollingBuilding
+        key={`left-${scrollKey}`}
+        src={ASSETS.leftBuilding}
+        side="left"
+      />
 
-      {/* ── Layer 3: Scrolling right building ── */}
-      <ScrollingBuilding src={ASSETS.rightBuilding} side="right" />
-
-      {/* ── Centre-lane dim overlay ── */}
-      <div
-        style={{
-          position:      'absolute',
-          left:          160,
-          right:         160,
-          top:           0,
-          bottom:        0,
-          background:    'linear-gradient(180deg, rgba(0,12,30,0.3) 0%, rgba(0,12,30,0.05) 100%)',
-          zIndex:        6,
-          pointerEvents: 'none',
-        }}
+      {/* ── Layer 3: Right building ── */}
+      <ScrollingBuilding
+        key={`right-${scrollKey}`}
+        src={ASSETS.rightBuilding}
+        side="right"
       />
 
       {/* ── Mode badge ── */}
@@ -176,7 +164,9 @@ export default function GameViewport({
       {/* ── Web line ── */}
       <WebLine start={heroPos} end={weblineEnd} visible={weblineVisible} />
 
-      {/* ── Anchor pads (keyed by roundIndex so spawn animation re-fires) ── */}
+      {/* ── Anchor pads ──
+           keyed by roundIndex so anchorSpawn animation re-fires each round.
+           Pads slide in from 280px above their natural position (off-screen). */}
       {anchors.map(a => (
         <AnchorPad
           key={`${roundIndex}-${a.id}`}

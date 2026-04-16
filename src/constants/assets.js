@@ -22,9 +22,9 @@ export const VP_H = 560;
 export const LEFT_X  = 255;
 export const RIGHT_X = 645;
 
-// Row y positions
-export const LOWER_Y = 390;
-export const UPPER_Y = 200;
+// Row y positions — wider gap so upper/lower pads feel far apart
+export const LOWER_Y = 435;   // lower pads close to bottom
+export const UPPER_Y = 140;   // upper pads near top → 295px gap between rows
 
-// Hero starting y (standing on rooftop during intro)
-export const HERO_START_Y = 470;
+// Hero starting y (intro round — standing on rooftop)
+export const HERO_START_Y = 455;

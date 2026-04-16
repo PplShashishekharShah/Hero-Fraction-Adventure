@@ -22,6 +22,7 @@ export default function FractionClimbGame() {
     progress,
     modeLabel,
     showRooftop,
+    scrollKey,
     handleAnchorClick,
     resetGame,
   } = useGameLogic();
@@ -53,6 +54,7 @@ export default function FractionClimbGame() {
         inputLocked={inputLocked}
         won={won}
         showRooftop={showRooftop}
+        scrollKey={scrollKey}
         onAnchorClick={handleAnchorClick}
         onReplay={resetGame}
       />

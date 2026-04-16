@@ -25,6 +25,7 @@ export function useGameLogic() {
   const [feedback,       setFeedback]       = useState({ message: '', type: 'correct', visible: false });
   const [anchorStates,   setAnchorStates]   = useState({});
   const [won,            setWon]            = useState(false);
+  const [scrollKey,      setScrollKey]      = useState(0);  // increments on correct climb → re-keys building strips
 
   // ── Timeout registry ──────────────────────────────────────────────────────
   const timeouts = useRef([]);
@@ -73,6 +74,7 @@ export function useGameLogic() {
     setFeedback({ message: '', type: 'correct', visible: false });
     setAnchorStates({});
     setWon(false);
+    setScrollKey(0);
   }, []);
 
   // ── Anchor click ──────────────────────────────────────────────────────────
@@ -118,6 +120,7 @@ export function useGameLogic() {
 
             delay(() => {
               setFeedback(f => ({ ...f, visible: false }));
+              setScrollKey(k => k + 1);   // trigger building scroll
               const newProgress = progress + 1;
               setProgress(newProgress);
 
@@ -205,6 +208,7 @@ export function useGameLogic() {
     progress,
     modeLabel,
     showRooftop,
+    scrollKey,
     handleAnchorClick,
     resetGame,
   };
