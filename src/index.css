@@ -30,9 +30,24 @@ body {
 /* ─── Anchor Pads — spawn from above the screen top ────────────────────────── */
 /* Softened the spawn path for a more fluid entrance                          */
 @keyframes anchorSpawn {
-  0%   { transform: translateY(-350px); opacity: 0; }
-  20%  { opacity: 0; }
+  0%   { transform: translateY(-500px); opacity: 0; }
+  30%  { opacity: 0; }
   100% { transform: translateY(0);      opacity: 1; }
+}
+
+/* ─── Anchor descend (upper to lower) ───────────────────────────────────────── */
+/* Used for the anchors that move from the top row to the bottom row          */
+@keyframes anchorDescend {
+  from { transform: translateY(-295px); }
+  to   { transform: translateY(0); }
+}
+
+/* ─── Anchor exit (lower moving out) ────────────────────────────────────────── */
+/* Used for symbols moving out of the bottom row                              */
+@keyframes anchorExitDown {
+  0%   { transform: translateY(0); opacity: 1; }
+  60%  { opacity: 0.3; }
+  100% { transform: translateY(295px);  opacity: 0; }
 }
 
 /* ─── Anchor idle float ─────────────────────────────────────────────────────── */

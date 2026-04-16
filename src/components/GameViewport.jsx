@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { ASSETS, VP_W, VP_H } from '../constants/assets';
 import AnchorPad     from './AnchorPad';
 import Hero          from './Hero';
@@ -70,6 +71,23 @@ export default function GameViewport({
   onAnchorClick,
   onReplay,
 }) {
+  // Snapshot mechanism for "continuous" transitions
+  const [exitingAnchors, setExitingAnchors] = useState([]);
+  const prevRoundIndex = useRef(roundIndex);
+
+  useEffect(() => {
+    // When round advances, capture current lower anchors to show them exiting
+    if (roundIndex > prevRoundIndex.current) {
+      const oldLower = anchors.filter(a => a.role === 'lower');
+      if (oldLower.length > 0) {
+        setExitingAnchors(oldLower);
+        // Clear them after animation finishes
+        setTimeout(() => setExitingAnchors([]), 1100);
+      }
+    }
+    prevRoundIndex.current = roundIndex;
+  }, [roundIndex, anchors]);
+
   return (
     <div
       style={{
@@ -164,21 +182,37 @@ export default function GameViewport({
       {/* ── Web line ── */}
       <WebLine start={heroPos} end={weblineEnd} visible={weblineVisible} />
 
-      {/* ── Anchor pads ──
-           keyed by roundIndex so anchorSpawn animation re-fires each round.
-           Pads slide in from 280px above their natural position (off-screen). */}
-      {anchors.map(a => (
+      {/* ── Transitioning Anchors (Exiting) ── */}
+      {exitingAnchors.map(a => (
         <AnchorPad
-          key={`${roundIndex}-${a.id}`}
+          key={`exit-${a.id}-${roundIndex}`}
           x={a.x}
           y={a.y}
           n={a.n}
           d={a.d}
-          state={anchorStates[a.id] ?? 'idle'}
-          selectable={a.selectable && !inputLocked}
-          onClick={() => onAnchorClick(a.id)}
+          state="exiting"
+          selectable={false}
         />
       ))}
+
+      {/* ── Current Round Anchors ── */}
+      {anchors.map(a => {
+        // Lower anchors arrive by "descending" from upper row (except first round)
+        const transitionState = (roundIndex > 0 && a.role === 'lower') ? 'descending' : 'idle';
+        
+        return (
+          <AnchorPad
+            key={`${roundIndex}-${a.id}`}
+            x={a.x}
+            y={a.y}
+            n={a.n}
+            d={a.d}
+            state={anchorStates[a.id] || transitionState}
+            selectable={a.selectable && !inputLocked}
+            onClick={() => onAnchorClick(a.id)}
+          />
+        );
+      })}
 
       {/* ── Hero character ── */}
       <Hero x={heroPos.x} y={heroPos.y} heroState={heroState} />

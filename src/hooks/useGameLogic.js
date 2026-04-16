@@ -133,13 +133,17 @@ export function useGameLogic() {
 
               const nextRound = ROUNDS[roundIndex + 1];
               setAnchorStates({});
+              
+              // Key change: use the anchor's X (where the hero just landed)
+              // heroPos.x in this closure still refers to the old position!
+              const landedX = anchor.x;
 
               if (nextRound?.mode === 'climb') {
-                setHeroPos({ x: LEFT_X, y: LOWER_Y });
-                setSafePos({ x: LEFT_X, y: LOWER_Y });
+                setHeroPos({ x: landedX, y: LOWER_Y });
+                setSafePos({ x: landedX, y: LOWER_Y });
               } else {
-                setHeroPos({ x: VP_W / 2, y: HERO_START_Y });
-                setSafePos({ x: VP_W / 2, y: HERO_START_Y });
+                setHeroPos({ x: landedX, y: LOWER_Y });
+                setSafePos({ x: landedX, y: LOWER_Y });
               }
 
               setRoundIndex(r => r + 1);
