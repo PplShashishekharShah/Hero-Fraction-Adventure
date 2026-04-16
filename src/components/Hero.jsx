@@ -38,10 +38,14 @@ export default function Hero({ x, y, heroState, heroDirection }) {
       alt="Web Hero"
       style={{
         position:   'absolute',
-        left:       x - 55,
-        top:        y - 90,
-        width:      110,
-        height:     140, // consistent size
+        // left:       x - 55,
+        // top:        y - 90,
+        // width:      110,
+        // height:     140, // consistent size
+        left:       x - 70,       // Adjusted offset for larger size
+        top:        y - 120,      // Adjusted offset for larger size
+        width:      140,          // Enlarged width
+        height:     180,          // Enlarged height
         objectFit:  'contain',
         zIndex:     25,
         transition: 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)',
