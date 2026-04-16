@@ -1,3 +1,55 @@
+/* ─── Loading Screen ───────────────────────────────────────────────────────── */
+.loading-screen {
+  position:       fixed;
+  inset:          0;
+  background:     radial-gradient(circle at center, #001a33 0%, #000810 100%);
+  display:        flex;
+  flex-direction: column;
+  align-items:     center;
+  justify-content: center;
+  z-index:        9999;
+  color:          #1de9b6;
+  font-family:    'Exo 2', sans-serif;
+}
+
+.loading-bar-container {
+  width:         240px;
+  height:        8px;
+  background:    rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow:      hidden;
+  margin-top:    20px;
+  border:        1px solid rgba(29, 233, 182, 0.1);
+  box-shadow:    0 0 20px rgba(0,0,0,0.5);
+}
+
+.loading-bar-fill {
+  height:     100%;
+  background: linear-gradient(90deg, #1de9b6, #00b0ff, #1de9b6);
+  background-size: 200% 100%;
+  box-shadow: 0 0 15px #1de9b688;
+  transition: width 0.3s ease-out;
+  animation:  loadingGradient 2s linear infinite;
+}
+
+.loading-text {
+  font-size:      14px;
+  font-weight:    800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation:      textPulse 2s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+  0%, 100% { opacity: 0.4; filter: blur(1px); }
+  50%       { opacity: 1;   filter: blur(0px); }
+}
+
+@keyframes loadingGradient {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ─── Global Reset & Base ──────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -66,7 +118,13 @@ body {
 
 @keyframes heroFloat {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-5px); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ─── Global Overlay Flash ─────────────────────────────────────────────────── */
+@keyframes overlayFlash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ─── Win screen pop ───────────────────────────────────────────────────────── */

@@ -4,24 +4,44 @@ import { ASSETS } from '../constants/assets';
  * Hero — Spider-Man character.
  *
  * - Bigger size: 110×140 px
- * - Shows shooting GIF during both 'shooting' AND 'climbing' states
- *   so the web-swing animation plays through the whole movement.
+ * - Shows specific shooting GIFs based on direction
+ * - Shows falling GIF for incorrect choices
  */
-export default function Hero({ x, y, heroState }) {
-  // Show the action GIF while launching AND swinging toward anchor
-  const isSwinging = heroState === 'shooting' || heroState === 'climbing';
+export default function Hero({ x, y, heroState, heroDirection }) {
+  // Determine which image to show
+  const getHeroImage = () => {
+    const isShooting = heroState === 'shooting';
+    const isClimbing = heroState === 'climbing';
+    const isAction   = isShooting || isClimbing;
+    const isFalling  = heroState === 'falling';
+
+    if (isFalling) return ASSETS.characterFall;
+    
+    if (isAction) {
+      if (heroDirection === 'left')  return ASSETS.shootLeft;
+      if (heroDirection === 'right') return ASSETS.shootRight;
+      if (heroDirection === 'top')   return ASSETS.shootTop;
+      return ASSETS.characterShoot; // fallback if no direction
+    }
+
+    return ASSETS.character;
+  };
+
+  const currentImg = getHeroImage();
 
   return (
     <img
-      key={isSwinging ? 'swing' : 'idle'}
-      src={isSwinging ? ASSETS.characterShoot : ASSETS.character}
+      // Stability fix: the key remains the same for the entire jump/fall action
+      // so the GIF doesn't restart or flicker when state moves from 'shooting' to 'climbing'
+      key={heroState === 'idle' ? 'idle' : 'action-running'}
+      src={currentImg}
       alt="Web Hero"
       style={{
         position:   'absolute',
         left:       x - 55,
         top:        y - 90,
         width:      110,
-        height:     140,
+        height:     140, // consistent size
         objectFit:  'contain',
         zIndex:     25,
         transition: 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)',

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ROUNDS, TOTAL_CLIMBS } from '../data/rounds';
 import {
+  ASSETS,
   VP_W,
   LEFT_X,
   RIGHT_X,
@@ -25,16 +26,38 @@ export function useGameLogic() {
   const [feedback,       setFeedback]       = useState({ message: '', type: 'correct', visible: false });
   const [anchorStates,   setAnchorStates]   = useState({});
   const [won,            setWon]            = useState(false);
-  const [scrollKey,      setScrollKey]      = useState(0);  // increments on correct climb → re-keys building strips
+  const [scrollKey,      setScrollKey]      = useState(0); 
+  const [flashStatus,    setFlashStatus]    = useState(null); // 'correct' | 'incorrect' | null
+  const [heroDirection,  setHeroDirection]  = useState(null); // 'left' | 'right' | 'top' | null
 
   // ── Timeout registry ──────────────────────────────────────────────────────
   const timeouts = useRef([]);
-  const delay = (fn, ms) => {
+  const delay = useCallback((fn, ms) => {
     const t = setTimeout(fn, ms);
     timeouts.current.push(t);
     return t;
-  };
-  useEffect(() => () => timeouts.current.forEach(clearTimeout), []);
+  }, []);
+
+  useEffect(() => () => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    timeouts.current.forEach(clearTimeout);
+  }, []);
+
+  // ── Feedback Utilities ────────────────────────────────────────────────────
+  const triggerFeedback = useCallback((type) => {
+    setFlashStatus(type);
+    delay(() => setFlashStatus(null), 1000);
+
+    // Audio
+    const sfx = new Audio(type === 'correct' ? ASSETS.sfxCorrect : ASSETS.sfxIncorrect);
+    sfx.volume = 0.5;
+    sfx.play().catch(() => {}); // catch autoplay blocks
+
+    // Haptics (Vibration)
+    if ("vibrate" in navigator) {
+      navigator.vibrate(type === 'correct' ? 100 : [100, 50, 200]);
+    }
+  }, [delay]);
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const round = ROUNDS[roundIndex] ?? ROUNDS[ROUNDS.length - 1];
@@ -43,20 +66,30 @@ export function useGameLogic() {
     setAnchorStates(prev => ({ ...prev, [id]: st }));
 
   // ── Anchor geometry ───────────────────────────────────────────────────────
+  // We shuffle the options so the correct one isn't always in the same spot
   const getAnchors = useCallback(() => {
+    // Deterministic shuffle based on roundIndex so it stays constant within a round
+    const isSwapped = roundIndex % 2 === 1; 
+
     if (round.mode === 'intro') {
+      const opts = isSwapped ? [round.options[1], round.options[0]] : [round.options[0], round.options[1]];
       return [
-        { id: 'left',  x: LEFT_X,  y: UPPER_Y, n: round.options[0].n, d: round.options[0].d, selectable: true,  role: 'upper' },
-        { id: 'right', x: RIGHT_X, y: UPPER_Y, n: round.options[1].n, d: round.options[1].d, selectable: true,  role: 'upper' },
+        { id: isSwapped ? 'right' : 'left',  x: LEFT_X,  y: UPPER_Y, n: opts[0].n, d: opts[0].d, selectable: true,  role: 'upper' },
+        { id: isSwapped ? 'left' : 'right', x: RIGHT_X, y: UPPER_Y, n: opts[1].n, d: opts[1].d, selectable: true,  role: 'upper' },
       ];
     }
+
+    // For climb rounds, we randomly swap the 'ul/ur' visual representation
+    const uLeft  = isSwapped ? round.upperRight : round.upperLeft;
+    const uRight = isSwapped ? round.upperLeft : round.upperRight;
+
     return [
       { id: 'll', x: LEFT_X,  y: LOWER_Y, n: round.lowerLeft.n,  d: round.lowerLeft.d,  selectable: false, role: 'lower' },
       { id: 'lr', x: RIGHT_X, y: LOWER_Y, n: round.lowerRight.n, d: round.lowerRight.d, selectable: false, role: 'lower' },
-      { id: 'ul', x: LEFT_X,  y: UPPER_Y, n: round.upperLeft.n,  d: round.upperLeft.d,  selectable: true,  role: 'upper' },
-      { id: 'ur', x: RIGHT_X, y: UPPER_Y, n: round.upperRight.n, d: round.upperRight.d, selectable: true,  role: 'upper' },
+      { id: 'ul', x: LEFT_X,  y: UPPER_Y, n: uLeft.n,           d: uLeft.d,            selectable: true,  role: 'upper' },
+      { id: 'ur', x: RIGHT_X, y: UPPER_Y, n: uRight.n,          d: uRight.d,           selectable: true,  role: 'upper' },
     ];
-  }, [round]);
+  }, [round, roundIndex]);
 
   const anchors = getAnchors();
 
@@ -66,6 +99,7 @@ export function useGameLogic() {
     setRoundIndex(0);
     setProgress(0);
     setHeroState('idle');
+    setHeroDirection(null);
     setHeroPos({ x: VP_W / 2, y: HERO_START_Y });
     setSafePos({ x: VP_W / 2, y: HERO_START_Y });
     setInputLocked(false);
@@ -75,6 +109,7 @@ export function useGameLogic() {
     setAnchorStates({});
     setWon(false);
     setScrollKey(0);
+    setFlashStatus(null);
   }, []);
 
   // ── Anchor click ──────────────────────────────────────────────────────────
@@ -85,31 +120,41 @@ export function useGameLogic() {
       if (!anchor?.selectable) return;
 
       setInputLocked(true);
-      const isCorrect = anchorId === round.correctId;
+      
+      // Check correctness by values, not just IDs, due to shuffling
+      const correctVal = round.mode === 'intro' 
+        ? Math.max(round.options[0].n / round.options[0].d, round.options[1].n / round.options[1].d)
+        : Math.max(round.upperLeft.n / round.upperLeft.d, round.upperRight.n / round.upperRight.d);
+      
+      const selectedVal = anchor.n / anchor.d;
+      const isCorrect = Math.abs(selectedVal - correctVal) < 0.0001;
+
+      // Determine shooting direction GIF
+      if (Math.abs(anchor.x - heroPos.x) < 50) setHeroDirection('top');
+      else if (anchor.x < heroPos.x)           setHeroDirection('left');
+      else                                     setHeroDirection('right');
 
       const selFrac    = `${anchor.n}/${anchor.d}`;
-      const allOptions =
-        round.mode === 'intro'
-          ? round.options
-          : [round.upperLeft, round.upperRight].map((o, i) => ({ ...o, id: i === 0 ? 'ul' : 'ur' }));
-      const other     = allOptions.find(o => o.id !== anchorId);
+      const allOptions = anchors.filter(a => a.selectable);
+      const other      = allOptions.find(o => o.id !== anchorId);
       const otherFrac = other ? `${other.n}/${other.d}` : '';
 
-      // Step 1 — shoot web (GIF starts here)
+      // Step 1 — shoot web
       setHeroState('shooting');
       setWeblineEnd({ x: anchor.x, y: anchor.y });
       setWeblineVisible(true);
 
       delay(() => {
-        // Step 2 — swing/climb (GIF stays on — same key 'swing' in Hero)
+        // Step 2 — swing/climb
         setHeroState('climbing');
 
         if (isCorrect) {
+          triggerFeedback('correct');
           setAnchor(anchorId, 'correct');
           setHeroPos({ x: anchor.x, y: anchor.y });
 
           delay(() => {
-            // Step 3 — celebrate (switch back to idle character img)
+            // Step 3 — celebrate
             setHeroState('celebrating');
             setWeblineVisible(false);
             setFeedback({
@@ -120,13 +165,14 @@ export function useGameLogic() {
 
             delay(() => {
               setFeedback(f => ({ ...f, visible: false }));
-              setScrollKey(k => k + 1);   // trigger building scroll
+              setScrollKey(k => k + 1);   
               const newProgress = progress + 1;
               setProgress(newProgress);
 
               if (newProgress >= TOTAL_CLIMBS) {
                 setWon(true);
                 setHeroState('idle');
+                setHeroDirection(null);
                 setInputLocked(false);
                 return;
               }
@@ -134,10 +180,7 @@ export function useGameLogic() {
               const nextRound = ROUNDS[roundIndex + 1];
               setAnchorStates({});
               
-              // Key change: use the anchor's X (where the hero just landed)
-              // heroPos.x in this closure still refers to the old position!
               const landedX = anchor.x;
-
               if (nextRound?.mode === 'climb') {
                 setHeroPos({ x: landedX, y: LOWER_Y });
                 setSafePos({ x: landedX, y: LOWER_Y });
@@ -148,12 +191,14 @@ export function useGameLogic() {
 
               setRoundIndex(r => r + 1);
               setHeroState('idle');
+              setHeroDirection(null);
               setInputLocked(false);
             }, 1000);
           }, 700);
 
         } else {
-          // Wrong — swing halfway, break, fall back
+          // Wrong
+          triggerFeedback('incorrect');
           const midX = (heroPos.x + anchor.x) / 2;
           const midY = (heroPos.y + anchor.y) / 2;
           setAnchor(anchorId, 'wrong');
@@ -176,6 +221,7 @@ export function useGameLogic() {
                 setFeedback(f => ({ ...f, visible: false }));
                 setAnchor(anchorId, 'idle');
                 setHeroState('idle');
+                setHeroDirection(null);
                 setInputLocked(false);
               }, 1200);
             }, 500);
@@ -184,17 +230,15 @@ export function useGameLogic() {
       }, 500);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [inputLocked, won, anchors, round, progress, roundIndex, heroPos, safePos]
+    [inputLocked, won, anchors, round, progress, roundIndex, heroPos, safePos, triggerFeedback]
   );
 
   // ── Derived UI values ─────────────────────────────────────────────────────
-  // With 1 intro round (index 0) + 5 climb rounds (indices 1-5)
   const modeLabel =
     round.mode === 'intro'
       ? 'Intro Round 1 of 1'
       : `Climb Round ${roundIndex} of ${TOTAL_CLIMBS - 1}`;
 
-  // Show rooftop only on the single intro round
   const showRooftop = roundIndex === 0;
 
   return {
@@ -204,6 +248,8 @@ export function useGameLogic() {
     anchorStates,
     heroPos,
     heroState,
+    heroDirection,
+    flashStatus,
     weblineVisible,
     weblineEnd,
     feedback,

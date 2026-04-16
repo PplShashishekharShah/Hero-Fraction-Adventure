@@ -20,14 +20,14 @@ export default function WebLine({ start, end, visible }) {
         left:            start.x,
         top:             start.y,
         width:           dist,
-        height:          32,
+        height:          48,
         objectFit:       'fill',
         transformOrigin: '0 50%',
         transform:       `rotate(${angle}deg)`,
         opacity:         visible ? 1 : 0,
         transition:      'opacity 0.2s',
         pointerEvents:   'none',
-        zIndex:          30,
+        zIndex:          40,
         mixBlendMode:    'screen',
       }}
     />

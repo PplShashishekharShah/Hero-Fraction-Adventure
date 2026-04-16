@@ -61,6 +61,8 @@ export default function GameViewport({
   anchorStates,
   heroPos,
   heroState,
+  heroDirection,
+  flashStatus,
   weblineVisible,
   weblineEnd,
   feedback,
@@ -215,7 +217,26 @@ export default function GameViewport({
       })}
 
       {/* ── Hero character ── */}
-      <Hero x={heroPos.x} y={heroPos.y} heroState={heroState} />
+      <Hero 
+        x={heroPos.x} 
+        y={heroPos.y} 
+        heroState={heroState} 
+        heroDirection={heroDirection} 
+      />
+
+      {/* ── Feedback Flash Overlay ── */}
+      {flashStatus && (
+        <div
+          style={{
+            position:      'absolute',
+            inset:         0,
+            background:    flashStatus === 'correct' ? '#00ff9922' : '#ff330022',
+            zIndex:        100,
+            pointerEvents: 'none',
+            animation:     'overlayFlash 1s ease-out forwards',
+          }}
+        />
+      )}
 
       {/* ── Win screen ── */}
       {won && <WinScreen onReplay={onReplay} />}
