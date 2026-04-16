@@ -1,0 +1,63 @@
+/* ─── Global Reset & Base ──────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: 'Exo 2', 'Segoe UI', sans-serif;
+  background: #000c1a;
+  color: #e0f4ff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Building Scroll (downward) — gives upward climb feel ─────────────────── */
+/*
+   Container height = 2 × VP_H.
+   At 0%  → translateY(-50%) shifts container up by VP_H  → bottom image fills viewport.
+   At 100%→ translateY(0)    → no shift               → top image fills viewport.
+   Both images are identical so the loop is seamless.
+*/
+@keyframes buildingScroll {
+  0%   { transform: translateY(-50%); }
+  100% { transform: translateY(0);    }
+}
+
+/* ─── Anchor Pads Spawn (slide + fade from above) ──────────────────────────── */
+@keyframes anchorSpawn {
+  0%   { transform: translateY(-70px); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0);      opacity: 1; }
+}
+
+/* ─── Hero animations ──────────────────────────────────────────────────────── */
+@keyframes floatAnchor {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes heroBounce {
+  0%   { transform: scaleY(1) scaleX(1); }
+  30%  { transform: scaleY(0.85) scaleX(1.15); }
+  60%  { transform: scaleY(1.12) scaleX(0.92); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+
+/* ─── Win screen pop ───────────────────────────────────────────────────────── */
+@keyframes winPop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
