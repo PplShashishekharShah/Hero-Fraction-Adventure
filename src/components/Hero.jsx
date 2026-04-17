@@ -15,6 +15,7 @@ export default function Hero({ x, y, heroState, heroDirection }) {
     const isAction   = isShooting || isClimbing;
     const isFalling  = heroState === 'falling';
 
+    if (heroState === 'backflip') return ASSETS.backflip;
     if (isFalling) return ASSETS.characterFall;
     
     if (isAction) {
@@ -42,8 +43,8 @@ export default function Hero({ x, y, heroState, heroDirection }) {
         objectFit:  'contain',
         zIndex:     25,
         // Transition becomes long (2.2s) only during the downward round shift ('idle')
-        // to sync with buildings. During 'climbing' or 'falling', it stays fast (0.7s).
-        transition: heroState === 'climbing' || heroState === 'falling'
+        // to sync with buildings. During 'climbing', 'backflip', or 'falling', it stays fast (0.7s).
+        transition: ['climbing', 'backflip', 'falling'].includes(heroState)
           ? 'left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1)'
           : 'left 2.2s cubic-bezier(0.42, 0, 0.58, 1), top 2.2s cubic-bezier(0.42, 0, 0.58, 1)',
         filter:

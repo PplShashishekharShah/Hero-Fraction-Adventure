@@ -16,6 +16,7 @@ export const ASSETS = {
   anchorBreak:     '/assets/anchor_pads_break.png',
   plate:           '/assets/fraction_display_plate.png',
   webline:         '/assets/webline.png',
+  backflip:        '/assets/backflip2.gif',
   sfxCorrect:      '/assets/correct.wav',
   sfxIncorrect:    '/assets/incorrect.wav',
 };

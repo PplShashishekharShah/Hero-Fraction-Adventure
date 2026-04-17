@@ -146,47 +146,52 @@ export function useGameLogic() {
           setHeroPos({ x: anchor.x, y: anchor.y });
 
           delay(() => {
-            // Step 3 — celebrate
-            setHeroState('celebrating');
+            // Step 3 — backflip on landing
+            setHeroState('backflip');
             setWeblineVisible(false);
-            setFeedback({
-              message: `Great! ${selFrac} is greater than ${otherFrac}.`,
-              type:    'correct',
-              visible: true,
-            });
 
             delay(() => {
-              setFeedback(f => ({ ...f, visible: false }));
-              setScrollKey(k => k + 1);   
-              const newProgress = progress + 1;
-              setProgress(newProgress);
+              // Step 4 — celebrate
+              setHeroState('celebrating');
+              setFeedback({
+                message: `Great! ${selFrac} is greater than ${otherFrac}.`,
+                type:    'correct',
+                visible: true,
+              });
 
-              if (newProgress >= TOTAL_CLIMBS) {
-                setWon(true);
+              delay(() => {
+                setFeedback(f => ({ ...f, visible: false }));
+                setScrollKey(k => k + 1);   
+                const newProgress = progress + 1;
+                setProgress(newProgress);
+
+                if (newProgress >= TOTAL_CLIMBS) {
+                  setWon(true);
+                  setHeroState('idle');
+                  setHeroDirection(null);
+                  setInputLocked(false);
+                  return;
+                }
+
+                const nextRound = ROUNDS[roundIndex + 1];
+                setAnchorStates({});
+                
+                const landedX = anchor.x;
+                if (nextRound?.mode === 'climb') {
+                  setHeroPos({ x: landedX, y: LOWER_Y });
+                  setSafePos({ x: landedX, y: LOWER_Y });
+                } else {
+                  setHeroPos({ x: landedX, y: LOWER_Y });
+                  setSafePos({ x: landedX, y: LOWER_Y });
+                }
+
+                setRoundIndex(r => r + 1);
                 setHeroState('idle');
                 setHeroDirection(null);
                 setInputLocked(false);
-                return;
-              }
-
-              const nextRound = ROUNDS[roundIndex + 1];
-              setAnchorStates({});
-              
-              const landedX = anchor.x;
-              if (nextRound?.mode === 'climb') {
-                setHeroPos({ x: landedX, y: LOWER_Y });
-                setSafePos({ x: landedX, y: LOWER_Y });
-              } else {
-                setHeroPos({ x: landedX, y: LOWER_Y });
-                setSafePos({ x: landedX, y: LOWER_Y });
-              }
-
-              setRoundIndex(r => r + 1);
-              setHeroState('idle');
-              setHeroDirection(null);
-              setInputLocked(false);
-            }, 1000);
-          }, 700);
+              }, 1000);
+            }, 1500); // backflip duration
+          }, 700); // climb duration
 
         } else {
           // Wrong
