@@ -44,19 +44,15 @@ export default function Hero({ x, y, heroState, heroDirection }) {
         zIndex:     25,
         // Transition becomes long (2.2s) only during the downward round shift ('idle')
         // to sync with buildings. During 'climbing', 'backflip', or 'falling', it stays fast (0.7s).
-        transition: ['climbing', 'backflip', 'falling'].includes(heroState)
+        transition: (['climbing', 'backflip', 'falling'].includes(heroState)
           ? 'left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1)'
-          : 'left 2.2s cubic-bezier(0.42, 0, 0.58, 1), top 2.2s cubic-bezier(0.42, 0, 0.58, 1)',
+          : 'left 2.2s cubic-bezier(0.42, 0, 0.58, 1), top 2.2s cubic-bezier(0.42, 0, 0.58, 1)') + ', filter 0.3s ease',
         filter:
-          heroState === 'celebrating'
-            ? 'drop-shadow(0 0 14px #ffe740)'
-            : heroState === 'falling'
+          heroState === 'falling'
             ? 'drop-shadow(0 0 10px #ff4444)'
             : 'drop-shadow(0 2px 8px #000b)',
         animation:
-          heroState === 'celebrating'
-            ? 'heroBounce 0.5s ease'
-            : heroState === 'idle'
+          heroState === 'idle'
             ? 'heroFloat 3s ease-in-out infinite'
             : 'none',
       }}
