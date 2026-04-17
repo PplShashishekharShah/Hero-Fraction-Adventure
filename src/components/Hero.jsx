@@ -31,24 +31,21 @@ export default function Hero({ x, y, heroState, heroDirection }) {
 
   return (
     <img
-      // Stability fix: the key remains the same for the entire jump/fall action
-      // so the GIF doesn't restart or flicker when state moves from 'shooting' to 'climbing'
-      key={heroState === 'idle' ? 'idle' : 'action-running'}
       src={currentImg}
       alt="Web Hero"
       style={{
         position:   'absolute',
-        // left:       x - 55,
-        // top:        y - 90,
-        // width:      110,
-        // height:     140, // consistent size
         left:       x - 70,       // Adjusted offset for larger size
         top:        y - 120,      // Adjusted offset for larger size
         width:      140,          // Enlarged width
         height:     180,          // Enlarged height
         objectFit:  'contain',
         zIndex:     25,
-        transition: 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)',
+        // Transition becomes long (2.2s) only during the downward round shift ('idle')
+        // to sync with buildings. During 'climbing' or 'falling', it stays fast (0.7s).
+        transition: heroState === 'climbing' || heroState === 'falling'
+          ? 'left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1)'
+          : 'left 2.2s cubic-bezier(0.42, 0, 0.58, 1), top 2.2s cubic-bezier(0.42, 0, 0.58, 1)',
         filter:
           heroState === 'celebrating'
             ? 'drop-shadow(0 0 14px #ffe740)'

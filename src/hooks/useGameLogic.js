@@ -68,28 +68,20 @@ export function useGameLogic() {
   // ── Anchor geometry ───────────────────────────────────────────────────────
   // We shuffle the options so the correct one isn't always in the same spot
   const getAnchors = useCallback(() => {
-    // Deterministic shuffle based on roundIndex so it stays constant within a round
-    const isSwapped = roundIndex % 2 === 1; 
-
     if (round.mode === 'intro') {
-      const opts = isSwapped ? [round.options[1], round.options[0]] : [round.options[0], round.options[1]];
       return [
-        { id: isSwapped ? 'right' : 'left',  x: LEFT_X,  y: UPPER_Y, n: opts[0].n, d: opts[0].d, selectable: true,  role: 'upper' },
-        { id: isSwapped ? 'left' : 'right', x: RIGHT_X, y: UPPER_Y, n: opts[1].n, d: opts[1].d, selectable: true,  role: 'upper' },
+        { id: 'left',  x: LEFT_X,  y: UPPER_Y, n: round.options[0].n, d: round.options[0].d, selectable: true,  role: 'upper' },
+        { id: 'right', x: RIGHT_X, y: UPPER_Y, n: round.options[1].n, d: round.options[1].d, selectable: true,  role: 'upper' },
       ];
     }
-
-    // For climb rounds, we randomly swap the 'ul/ur' visual representation
-    const uLeft  = isSwapped ? round.upperRight : round.upperLeft;
-    const uRight = isSwapped ? round.upperLeft : round.upperRight;
 
     return [
       { id: 'll', x: LEFT_X,  y: LOWER_Y, n: round.lowerLeft.n,  d: round.lowerLeft.d,  selectable: false, role: 'lower' },
       { id: 'lr', x: RIGHT_X, y: LOWER_Y, n: round.lowerRight.n, d: round.lowerRight.d, selectable: false, role: 'lower' },
-      { id: 'ul', x: LEFT_X,  y: UPPER_Y, n: uLeft.n,           d: uLeft.d,            selectable: true,  role: 'upper' },
-      { id: 'ur', x: RIGHT_X, y: UPPER_Y, n: uRight.n,          d: uRight.d,           selectable: true,  role: 'upper' },
+      { id: 'ul', x: LEFT_X,  y: UPPER_Y, n: round.upperLeft.n,  d: round.upperLeft.d,  selectable: true,  role: 'upper' },
+      { id: 'ur', x: RIGHT_X, y: UPPER_Y, n: round.upperRight.n, d: round.upperRight.d, selectable: true,  role: 'upper' },
     ];
-  }, [round, roundIndex]);
+  }, [round]);
 
   const anchors = getAnchors();
 

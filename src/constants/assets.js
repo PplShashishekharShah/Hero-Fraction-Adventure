@@ -2,8 +2,8 @@
 export const ASSETS = {
   bg:              '/assets/newyork_main_bg.png',
   rooftop:         '/assets/rooftop_start.png',
-  leftBuilding:    '/assets/left_building.png',
-  rightBuilding:   '/assets/right_building.png',
+  leftBuilding:    '/assets/left_building2.png',
+  rightBuilding:   '/assets/right_building2.png',
   character:       '/assets/character.png',
   characterShoot:  '/assets/character_shooting_web.gif', // fallback
   shootLeft:       '/assets/shooting_left.gif',
@@ -11,7 +11,7 @@ export const ASSETS = {
   shootTop:        '/assets/shooting_top.gif',
   characterFall:   '/assets/fallen_character.gif',
   anchorIdle:      '/assets/anchor_pads_idle.png',
-  anchorCorrect:   '/assets/anchor_pads_correct.png',
+  anchorCorrect:   '/assets/anchor_pads_idle.png',
   anchorWrong:     '/assets/anchor_pads_wrong.png',
   anchorBreak:     '/assets/anchor_pads_break.png',
   plate:           '/assets/fraction_display_plate.png',

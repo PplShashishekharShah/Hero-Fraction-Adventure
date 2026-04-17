@@ -75,15 +75,15 @@ body {
    Animation: translateY(-50%) → translateY(0).
    Increased duration in component for a more cinematic feel.                */
 @keyframes buildingClimbScroll {
-  from { transform: translateY(-50%); }
-  to   { transform: translateY(0);    }
+  from { transform: translateY(-295px); }
+  to   { transform: translateY(0);      }
 }
 
 /* ─── Anchor Pads — spawn from above the screen top ────────────────────────── */
 /* Softened the spawn path for a more fluid entrance                          */
 @keyframes anchorSpawn {
-  0%   { transform: translateY(-500px); opacity: 0; }
-  30%  { opacity: 0; }
+  0%   { transform: translateY(-295px); opacity: 0; }
+  10%  { opacity: 0; }
   100% { transform: translateY(0);      opacity: 1; }
 }
 
@@ -97,9 +97,17 @@ body {
 /* ─── Anchor exit (lower moving out) ────────────────────────────────────────── */
 /* Used for symbols moving out of the bottom row                              */
 @keyframes anchorExitDown {
-  0%   { transform: translateY(0); opacity: 1; }
-  60%  { opacity: 0.3; }
+  0%   { transform: translateY(0);      opacity: 1; }
   100% { transform: translateY(295px);  opacity: 0; }
+}
+
+/* Apply the timings to the components via these classes or directly in styles */
+.anchor-descend {
+  animation: anchorDescend 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+}
+
+.anchor-exit {
+  animation: anchorExitDown 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards;
 }
 
 /* ─── Anchor idle float ─────────────────────────────────────────────────────── */

@@ -47,12 +47,12 @@ export default function AnchorPad({ x, y, n, d, state, selectable, onClick }) {
         /* dynamic animation based on climbing state */
         animation: 
           state === 'exiting' 
-            ? 'anchorExitDown 1.1s cubic-bezier(0.25, 1, 0.5, 1) forwards'
+            ? 'anchorExitDown 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
             : state === 'descending'
-            ? 'anchorDescend 1.1s cubic-bezier(0.25, 1, 0.5, 1) forwards'
+            ? 'anchorDescend 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
             : selectable
-            ? 'anchorSpawn 1.1s cubic-bezier(0.25, 1, 0.5, 1) both, floatAnchor 2.2s ease-in-out infinite 1.1s'
-            : 'anchorSpawn 1.1s cubic-bezier(0.25, 1, 0.5, 1) both',
+            ? 'anchorSpawn 2.2s cubic-bezier(0.42, 0, 0.58, 1) both, floatAnchor 2.2s ease-in-out infinite 2.2s'
+            : 'anchorSpawn 2.2s cubic-bezier(0.42, 0, 0.58, 1) both',
       }}
     >
       {/* Fraction plate — sits directly above anchor with no gap */}

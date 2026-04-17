@@ -52,8 +52,8 @@ export const ROUNDS = [
   },
   {
     mode: 'climb',
-    lowerLeft:  { n: 3, d: 8 },
-    lowerRight: { n: 5, d: 12 },
+    lowerLeft:  { n: 5, d: 12 },
+    lowerRight: { n: 3, d: 8 },
     upperLeft:  { id: 'ul', n: 7, d: 10 },
     upperRight: { id: 'ur', n: 9, d: 10 },
     correctId: 'ur',
