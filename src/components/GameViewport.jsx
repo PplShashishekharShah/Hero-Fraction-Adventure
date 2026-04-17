@@ -76,18 +76,19 @@ export default function GameViewport({
   // Snapshot mechanism for "continuous" transitions
   const [exitingAnchors, setExitingAnchors] = useState([]);
   const prevRoundIndex = useRef(roundIndex);
+  const lastAnchors    = useRef(anchors);
 
   useEffect(() => {
-    // When round advances, capture current lower anchors to show them exiting
+    // When round advances, capture the PREVIOUS anchors to show them exiting
     if (roundIndex > prevRoundIndex.current) {
-      const oldLower = anchors.filter(a => a.role === 'lower');
+      const oldLower = lastAnchors.current.filter(a => a.role === 'lower');
       if (oldLower.length > 0) {
         setExitingAnchors(oldLower);
-        // Clear them after animation finishes
         setTimeout(() => setExitingAnchors([]), 2200);
       }
     }
     prevRoundIndex.current = roundIndex;
+    lastAnchors.current    = anchors;
   }, [roundIndex, anchors]);
 
   return (
