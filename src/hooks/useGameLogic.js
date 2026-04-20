@@ -29,6 +29,7 @@ export function useGameLogic() {
   const [scrollKey,      setScrollKey]      = useState(0); 
   const [flashStatus,    setFlashStatus]    = useState(null); // 'correct' | 'incorrect' | null
   const [heroDirection,  setHeroDirection]  = useState(null); // 'left' | 'right' | 'top' | null
+  const [heroScale,      setHeroScale]      = useState(1);
 
   // ── Timeout registry ──────────────────────────────────────────────────────
   const timeouts = useRef([]);
@@ -102,6 +103,7 @@ export function useGameLogic() {
     setWon(false);
     setScrollKey(0);
     setFlashStatus(null);
+    setHeroScale(1);
   }, []);
 
   // ── Anchor click ──────────────────────────────────────────────────────────
@@ -163,24 +165,21 @@ export function useGameLogic() {
                 delay(() => {
                   setHeroState('shooting');
                   setHeroDirection('right');
-                  setWeblineEnd({ x: VP_W - 40, y: 150 });
+                  setWeblineEnd({ x: VP_W - 40, y: 100 });
                   setWeblineVisible(true);
 
                   delay(() => {
                     setHeroState('climbing');
-                    const rooftopPos = { x: VP_W - 140, y: 300 }; // Landed on lowered terrace (top: 180)
+                    setHeroScale(0.8);
+                    const rooftopPos = { x: VP_W - 100, y: 80 }; // Landing accurately on 67px terrace
                     setHeroPos(rooftopPos);
 
                     delay(() => {
-                      setHeroState('backflip');
+                      setHeroState('idle'); // Final static character show - no backflip on roof
                       setWeblineVisible(false);
-
-                      delay(() => {
-                        setHeroState('idle'); // Final static character show
-                        setHeroDirection(null);
-                        setWon(true); 
-                        setInputLocked(false);
-                      }, 1500); // final backflip duration
+                      setHeroDirection(null);
+                      setWon(true); 
+                      setInputLocked(false);
                     }, 700); // final climb duration
                   }, 600); // final shooting delay
                 }, 1000); // pause after last anchor backflip
@@ -280,6 +279,7 @@ export function useGameLogic() {
     modeLabel,
     showRooftop,
     scrollKey,
+    heroScale,
     handleAnchorClick,
     resetGame,
   };

@@ -7,7 +7,7 @@ import { ASSETS } from '../constants/assets';
  * - Shows specific shooting GIFs based on direction
  * - Shows falling GIF for incorrect choices
  */
-export default function Hero({ x, y, heroState, heroDirection }) {
+export default function Hero({ x, y, heroState, heroDirection, scale = 1 }) {
   // Determine which image to show
   const getHeroImage = () => {
     const isShooting = heroState === 'shooting';
@@ -45,8 +45,10 @@ export default function Hero({ x, y, heroState, heroDirection }) {
         // Transition becomes long (2.2s) only during the downward round shift ('idle')
         // to sync with buildings. During 'climbing', 'backflip', or 'falling', it stays fast (0.7s).
         transition: (['climbing', 'backflip', 'falling'].includes(heroState)
-          ? 'left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1)'
-          : 'left 2.2s cubic-bezier(0.42, 0, 0.58, 1), top 2.2s cubic-bezier(0.42, 0, 0.58, 1)') + ', filter 0.3s ease',
+          ? 'left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s ease'
+          : 'left 2.2s cubic-bezier(0.42, 0, 0.58, 1), top 2.2s cubic-bezier(0.42, 0, 0.58, 1), transform 2.2s ease') + ', filter 0.3s ease',
+        transform: `scale(${scale})`,
+        transformOrigin: 'center center',
         filter:
           heroState === 'falling'
             ? 'drop-shadow(0 0 10px #ff4444)'

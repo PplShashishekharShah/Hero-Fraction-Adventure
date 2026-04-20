@@ -12,7 +12,7 @@ import WinScreen     from './WinScreen';
 // once: translateY(-50%) → translateY(0), creating a downward scroll feel.
 // `forwards` fill-mode keeps end state so buildings don't snap back.
 function ScrollingBuilding({ src, side, isFinal }) {
-  const sideStyle = side === 'left' ? { left: -60 } : { right: -60 };
+  const sideStyle = side === 'left' ? { left: -76 } : { right: -76 };
   return (
     <div
       style={{
@@ -51,6 +51,7 @@ export default function GameViewport({
   won,
   showRooftop,
   scrollKey,      // increments on each correct climb → re-keys buildings
+  heroScale,
   onAnchorClick,
   onReplay,
 }) {
@@ -145,10 +146,9 @@ export default function GameViewport({
             style={{
               position: 'absolute',
               top: 67,
-              left: -76,
+              left: -95,
               width: 280,
               height: 'auto',
-              animation: 'anchorSpawn 1s ease-out forwards',
             }}
           />
           <img
@@ -157,11 +157,9 @@ export default function GameViewport({
             style={{
               position: 'absolute',
               top: 67,
-             
-              right: -76,
+              right: -95,
               width: 280,
               height: 'auto',
-              animation: 'anchorSpawn 1s ease-out forwards',
             }}
           />
           
@@ -249,6 +247,7 @@ export default function GameViewport({
         y={heroPos.y} 
         heroState={heroState} 
         heroDirection={heroDirection} 
+        scale={heroScale}
       />
 
       {/* ── Feedback Flash Overlay ── */}
