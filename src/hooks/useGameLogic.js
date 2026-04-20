@@ -146,13 +146,49 @@ export function useGameLogic() {
           setHeroPos({ x: anchor.x, y: anchor.y });
 
           delay(() => {
-            // Step 3 — backflip on landing
+            // Step 3 — Jump to backflip immediately on landing (no intermediate static state)
             setHeroState('backflip');
             setWeblineVisible(false);
 
             delay(() => {
-              // Step 4 — celebrate
-              setHeroState('celebrating');
+              // Step 4 — End of backflip
+              const newProgress = progress + 1;
+              setProgress(newProgress);
+              setAnchorStates({});
+
+              if (newProgress >= TOTAL_CLIMBS) {
+                // FINAL Rooftop Climax: Automatically jump to right rooftop
+                setFeedback({ message: "MISSION COMPLETE!", type: 'correct', visible: true });
+                
+                delay(() => {
+                  setHeroState('shooting');
+                  setHeroDirection('right');
+                  setWeblineEnd({ x: VP_W - 40, y: 150 });
+                  setWeblineVisible(true);
+
+                  delay(() => {
+                    setHeroState('climbing');
+                    const rooftopPos = { x: VP_W - 140, y: 300 }; // Landed on lowered terrace (top: 180)
+                    setHeroPos(rooftopPos);
+
+                    delay(() => {
+                      setHeroState('backflip');
+                      setWeblineVisible(false);
+
+                      delay(() => {
+                        setHeroState('idle'); // Final static character show
+                        setHeroDirection(null);
+                        setWon(true); 
+                        setInputLocked(false);
+                      }, 1500); // final backflip duration
+                    }, 700); // final climb duration
+                  }, 600); // final shooting delay
+                }, 1000); // pause after last anchor backflip
+                return;
+              }
+
+              // Normal round transition — directly into stagnant idle/celebrate after backflip
+              setHeroState('idle');
               setFeedback({
                 message: `Great! ${selFrac} is greater than ${otherFrac}.`,
                 type:    'correct',
@@ -162,20 +198,8 @@ export function useGameLogic() {
               delay(() => {
                 setFeedback(f => ({ ...f, visible: false }));
                 setScrollKey(k => k + 1);   
-                const newProgress = progress + 1;
-                setProgress(newProgress);
-
-                if (newProgress >= TOTAL_CLIMBS) {
-                  setWon(true);
-                  setHeroState('idle');
-                  setHeroDirection(null);
-                  setInputLocked(false);
-                  return;
-                }
-
-                const nextRound = ROUNDS[roundIndex + 1];
-                setAnchorStates({});
                 
+                const nextRound = ROUNDS[roundIndex + 1];
                 const landedX = anchor.x;
                 if (nextRound?.mode === 'climb') {
                   setHeroPos({ x: landedX, y: LOWER_Y });

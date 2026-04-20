@@ -17,6 +17,10 @@ export const ASSETS = {
   plate:           '/assets/fraction_display_plate.png',
   webline:         '/assets/webline.png',
   backflip:        '/assets/backflip2.gif',
+  leftTerrace:     '/assets/left_terrace_top.png',
+  rightTerrace:    '/assets/right_terrace_top.png',
+  leftSky:         '/assets/left_sky.png',
+  rightSky:        '/assets/right_sky.png',
   sfxCorrect:      '/assets/correct.wav',
   sfxIncorrect:    '/assets/incorrect.wav',
 };

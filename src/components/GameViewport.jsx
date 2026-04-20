@@ -11,45 +11,26 @@ import WinScreen     from './WinScreen';
 // `from`). On each mount (caused by scrollKey change), the animation plays
 // once: translateY(-50%) → translateY(0), creating a downward scroll feel.
 // `forwards` fill-mode keeps end state so buildings don't snap back.
-function ScrollingBuilding({ src, side }) {
-  const sideStyle = side === 'left' ? { left: 0 } : { right: 0 };
+function ScrollingBuilding({ src, side, isFinal }) {
+  const sideStyle = side === 'left' ? { left: -60 } : { right: -60 };
   return (
     <div
       style={{
         position:       'absolute',
         ...sideStyle,
         top:            0,
-        width:          180,
+        width:          260,
         height:         VP_H * 2,
         zIndex:         5,
         pointerEvents:  'none',
-        animation:      'buildingClimbScroll 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards',
+        backgroundImage: `url(${src})`,
+        backgroundRepeat: 'repeat-y',
+        backgroundSize: '100% 560px',
+        backgroundColor: 'transparent',
+        animation:      isFinal ? 'none' : 'buildingClimbScroll 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards',
         willChange:     'transform',
       }}
-    >
-      <img
-        src={src}
-        alt=""
-        style={{
-          width:          '100%',
-          height:         VP_H,
-          objectFit:      'cover',
-          objectPosition: side === 'left' ? 'right' : 'left',
-          display:        'block',
-        }}
-      />
-      <img
-        src={src}
-        alt=""
-        style={{
-          width:          '100%',
-          height:         VP_H,
-          objectFit:      'cover',
-          objectPosition: side === 'left' ? 'right' : 'left',
-          display:        'block',
-        }}
-      />
-    </div>
+    />
   );
 }
 
@@ -144,6 +125,7 @@ export default function GameViewport({
         key={`left-${scrollKey}`}
         src={ASSETS.leftBuilding}
         side="left"
+        isFinal={roundIndex === 5}
       />
 
       {/* ── Layer 3: Right building ── */}
@@ -151,7 +133,51 @@ export default function GameViewport({
         key={`right-${scrollKey}`}
         src={ASSETS.rightBuilding}
         side="right"
+        isFinal={roundIndex === 5}
       />
+
+      {/* ── Layer 3.5: Final Terraces (Last Round Only) ── */}
+      {roundIndex === 5 && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 6, pointerEvents: 'none' }}>
+          <img
+            src={ASSETS.leftTerrace}
+            alt=""
+            style={{
+              position: 'absolute',
+              top: 67,
+              left: -76,
+              width: 280,
+              height: 'auto',
+              animation: 'anchorSpawn 1s ease-out forwards',
+            }}
+          />
+          <img
+            src={ASSETS.rightTerrace}
+            alt=""
+            style={{
+              position: 'absolute',
+              top: 67,
+             
+              right: -76,
+              width: 280,
+              height: 'auto',
+              animation: 'anchorSpawn 1s ease-out forwards',
+            }}
+          />
+          
+          {/* Overlay to clip buildings above rooftop via Sky images */}
+          <img 
+            src={ASSETS.leftSky} 
+            alt="" 
+            style={{ position: 'absolute', top: -9, left: 0, width: 155, height: 110, zIndex: 4,  objectFit: 'cover' }} 
+          />
+          <img 
+            src={ASSETS.rightSky} 
+            alt="" 
+            style={{ position: 'absolute', top:-9, right: 0, width: 155, height: 110, zIndex: 4, objectFit: 'cover' }} 
+          />
+        </div>
+      )}
 
       {/* ── Mode badge ── */}
       <div
@@ -239,8 +265,8 @@ export default function GameViewport({
         />
       )}
 
-      {/* ── Win screen ── */}
-      {won && <WinScreen onReplay={onReplay} />}
+      {/* ── Win screen — Hidden per user request for smoother climax ── */}
+      {/* {won && <WinScreen onReplay={onReplay} />} */}
     </div>
   );
 }
