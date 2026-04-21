@@ -1,0 +1,315 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { DESCENT_ROUNDS, TOTAL_DESCENT_DROPS } from '../data/descentRounds';
+import { ASSETS } from '../constants/assets';
+import { GAME_CONFIG, DESCENT_LAYOUT } from '../constants/gameConfig';
+
+const {
+  upperRailingY,
+  floorStep,
+  heroFeetFromRailingY,
+  leftTileX,
+  rightTileX,
+  patrolLeftX,
+  patrolRightX,
+} = DESCENT_LAYOUT;
+
+// ── Floor factory ──────────────────────────────────────────────────────────────
+// Creates a floor state object from a DESCENT_ROUNDS index.
+// worldY = the "world" Y of the railing top (absolute; never changes once created).
+function makeFloor(roundIndex) {
+  const round = DESCENT_ROUNDS[roundIndex];
+  if (!round) return null;
+  return {
+    ...round,
+    worldY:     upperRailingY + roundIndex * floorStep,
+    leftState:  'idle',
+    rightState: 'idle',
+  };
+}
+
+// ── Hook ───────────────────────────────────────────────────────────────────────
+/**
+ * useDescentLogic — all state and action handlers for descent mode.
+ *
+ * World / scroll system
+ * ─────────────────────
+ * Each floor has a fixed `worldY` (never mutates).
+ * screenY = floor.worldY - worldOffset
+ *
+ * When `worldOffset` increases by `floorStep` (on a successful drop):
+ *   • Every floor's CSS `top` changes simultaneously → all animate in sync.
+ *   • The upper floor exits (screenY < 0, opacity → 0).
+ *   • The lower floor slides to the upper position (screenY: lowerRailingY → upperRailingY).
+ *   • The pre-spawned hidden floor slides into the lower position.
+ *
+ * Hero position
+ * ─────────────
+ * heroWorldY  — hero feet Y in world coordinates.
+ * heroScreenY — heroWorldY - worldOffset  (computed by consumer).
+ *
+ *   Fall:   heroWorldY += floorStep  (CSS transition on `top` → visually falls down)
+ *   Scroll: worldOffset += floorStep (all tops animate up, including hero's screenY)
+ *           Net hero screen Y restores to upper floor position. ✓
+ */
+export function useDescentLogic() {
+  // ── World scroll ─────────────────────────────────────────────────────────
+  const [worldOffset, setWorldOffset] = useState(0);
+
+  // floors: ordered array of floor state objects in world space.
+  // Start with 3 floors: [0]=upper visible, [1]=lower visible, [2]=just below viewport.
+  const [floors, setFloors] = useState(() =>
+    [makeFloor(0), makeFloor(1), makeFloor(2)].filter(Boolean)
+  );
+
+  // ── Progress ─────────────────────────────────────────────────────────────
+  // dropCount = number of successful drops = DESCENT_ROUNDS index of active floor.
+  const [dropCount,       setDropCount]       = useState(0);
+  const [descentComplete, setDescentComplete] = useState(false);
+
+  // ── Hero state ───────────────────────────────────────────────────────────
+  const [heroWorldY,  setHeroWorldY]  = useState(upperRailingY + heroFeetFromRailingY);
+  const [heroWorldX,  setHeroWorldX]  = useState(patrolLeftX + 60);
+  const [heroPhase,   setHeroPhase]   = useState('walking'); // 'walking'|'paused'|'falling'|'landing'
+  const [heroFaceDir, setHeroFaceDir] = useState('right');
+  const heroDirRef = useRef(1); // 1 = right, -1 = left (mutable ref avoids rAF restarts)
+
+  // ── UI ───────────────────────────────────────────────────────────────────
+  const [inputLocked, setInputLocked] = useState(false);
+  const [feedback,    setFeedback]    = useState({ message: '', visible: false });
+  const [flashStatus, setFlashStatus] = useState(null); // 'correct'|'incorrect'|null
+
+  // ── Timeout registry (clean up all on unmount) ───────────────────────────
+  const timeouts = useRef([]);
+  const delay = useCallback((fn, ms) => {
+    const t = setTimeout(fn, ms);
+    timeouts.current.push(t);
+    return t;
+  }, []);
+  useEffect(() => () => timeouts.current.forEach(clearTimeout), []);
+
+  // ── Hero patrol loop ─────────────────────────────────────────────────────
+  // Runs only when heroPhase === 'walking' AND input is not locked.
+  // Uses a mutable heroDirRef so direction flips don't restart the effect.
+  useEffect(() => {
+    if (heroPhase !== 'walking' || inputLocked) return;
+
+    let lastTime = null;
+    let rafId;
+
+    const loop = (now) => {
+      if (lastTime !== null) {
+        const dt = (now - lastTime) / 1000; // seconds
+        setHeroWorldX(x => {
+          let nx = x + heroDirRef.current * GAME_CONFIG.patrolSpeedPxPerSecond * dt;
+          if (nx >= patrolRightX) {
+            heroDirRef.current = -1;
+            setHeroFaceDir('left');
+            nx = patrolRightX;
+          } else if (nx <= patrolLeftX) {
+            heroDirRef.current = 1;
+            setHeroFaceDir('right');
+            nx = patrolLeftX;
+          }
+          return nx;
+        });
+      }
+      lastTime = now;
+      rafId = requestAnimationFrame(loop);
+    };
+
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [heroPhase, inputLocked]);
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  /** Update left or right tile state on a specific floor. */
+  const updateTile = useCallback((floorId, side, newState) => {
+    setFloors(prev =>
+      prev.map(f =>
+        f.id !== floorId ? f : {
+          ...f,
+          leftState:  side === 'left'  ? newState : f.leftState,
+          rightState: side === 'right' ? newState : f.rightState,
+        }
+      )
+    );
+  }, []);
+
+  /** Play SFX and set the flash overlay. */
+  const triggerFeedback = useCallback((type) => {
+    const sfx = new Audio(type === 'correct' ? ASSETS.sfxCorrect : ASSETS.sfxIncorrect);
+    sfx.volume = 0.5;
+    sfx.play().catch(() => {});
+    if ('vibrate' in navigator) navigator.vibrate(type === 'correct' ? 80 : [80, 40, 160]);
+    setFlashStatus(type);
+    delay(() => setFlashStatus(null), 900);
+  }, [delay]);
+
+  /** Append a new floor to the floors array (idempotent — skips if already there). */
+  const spawnFloor = useCallback((roundIndex) => {
+    const newFloor = makeFloor(roundIndex);
+    if (!newFloor) return;
+    setFloors(prev =>
+      prev.some(f => f.id === newFloor.id) ? prev : [...prev, newFloor]
+    );
+  }, []);
+
+  // ── Active floor id ───────────────────────────────────────────────────────
+  // dropCount tracks which DESCENT_ROUNDS index is the current active floor.
+  // The active floor's id = DESCENT_ROUNDS[dropCount].id
+  const activeFloorId = DESCENT_ROUNDS[dropCount]?.id ?? null;
+
+  // ── Tile click handler ────────────────────────────────────────────────────
+  const handleTileClick = useCallback((side, floorId) => {
+    if (inputLocked || descentComplete) return;
+    if (floorId !== activeFloorId)      return;
+
+    const activeFloor = floors.find(f => f.id === floorId);
+    if (!activeFloor) return;
+
+    const isCorrect = side === activeFloor.correctSide;
+    const nextDrop  = dropCount + 1;
+
+    // Lock input immediately
+    setInputLocked(true);
+    setHeroPhase('paused');
+
+    if (isCorrect) {
+      // ── CORRECT SEQUENCE ─────────────────────────────────────────────────
+      triggerFeedback('correct');
+
+      // Pre-compute hero's next world Y (on the lower floor after this drop)
+      const nextHeroWorldY = upperRailingY + nextDrop * floorStep + heroFeetFromRailingY;
+
+      // Tile X the hero should align to before falling
+      const tileX = side === 'left' ? leftTileX : rightTileX;
+
+      // Step 1 — tile glows (correct state)
+      updateTile(floorId, side, 'correct');
+
+      // Step 2 — crack (after correctStateMs)
+      delay(() => updateTile(floorId, side, 'crack'), GAME_CONFIG.correctStateMs);
+
+      // Step 3 — broken + hero alignment (after correct + crack)
+      delay(() => {
+        updateTile(floorId, side, 'broken');
+
+        // Pre-spawn the floor TWO ahead of the next active floor so it is
+        // already in the DOM before the world scroll fires.
+        spawnFloor(nextDrop + 2);
+
+        // Move hero X to tile centre (CSS transition via 'paused' phase)
+        setHeroWorldX(tileX);
+
+        // Step 4 — after align pause, hero falls
+        delay(() => {
+          setHeroPhase('falling');
+          // heroWorldY change triggers the CSS fall transition (ease-in, fallDurationMs)
+          setHeroWorldY(nextHeroWorldY);
+
+          // Step 5 — after fall completes, landing phase
+          delay(() => {
+            // 'landing' phase sets hero transition to scrollDurationMs so the
+            // hero slides upward in perfect sync with the floor scroll below.
+            setHeroPhase('landing');
+
+            // Step 6 — after landing pause, trigger the world scroll
+            delay(() => {
+              // ALL floor divs and the hero's screenY change simultaneously here.
+              // Every element has transition: top Xms → they all animate together.
+              setWorldOffset(prev => prev + floorStep);
+              setDropCount(nextDrop);
+
+              // Step 7 — after scroll animation, resume
+              delay(() => {
+                if (nextDrop >= TOTAL_DESCENT_DROPS) {
+                  setDescentComplete(true);
+                  setInputLocked(false);
+                } else {
+                  setHeroPhase('walking');
+                  heroDirRef.current = 1;
+                  setHeroFaceDir('right');
+                  setInputLocked(false);
+                }
+              }, GAME_CONFIG.scrollDurationMs + 120);
+
+            }, GAME_CONFIG.landingPauseMs);
+          }, GAME_CONFIG.fallDurationMs);
+        }, GAME_CONFIG.alignMs);
+
+      }, GAME_CONFIG.correctStateMs + GAME_CONFIG.crackStateMs);
+
+    } else {
+      // ── WRONG SEQUENCE ───────────────────────────────────────────────────
+      triggerFeedback('incorrect');
+
+      const clicked = side === 'left' ? activeFloor.leftFraction : activeFloor.rightFraction;
+      const other   = side === 'left' ? activeFloor.rightFraction : activeFloor.leftFraction;
+
+      updateTile(floorId, side, 'wrong');
+      setFeedback({
+        message: `Oops! ${clicked.numerator}/${clicked.denominator} is LARGER. Pick the smaller one!`,
+        visible: true,
+      });
+
+      delay(() => {
+        updateTile(floorId, side, 'idle');
+        setFeedback(f => ({ ...f, visible: false }));
+        setHeroPhase('walking');
+        setInputLocked(false);
+      }, GAME_CONFIG.wrongStateMs);
+    }
+  }, [
+    inputLocked, descentComplete, activeFloorId, floors, dropCount,
+    updateTile, triggerFeedback, spawnFloor, delay,
+  ]);
+
+  // ── Reset ─────────────────────────────────────────────────────────────────
+  const resetDescent = useCallback(() => {
+    timeouts.current.forEach(clearTimeout);
+    timeouts.current = [];
+    setWorldOffset(0);
+    setFloors([makeFloor(0), makeFloor(1), makeFloor(2)].filter(Boolean));
+    setDropCount(0);
+    setDescentComplete(false);
+    setHeroWorldY(upperRailingY + heroFeetFromRailingY);
+    setHeroWorldX(patrolLeftX + 60);
+    setHeroPhase('walking');
+    setHeroFaceDir('right');
+    heroDirRef.current = 1;
+    setInputLocked(false);
+    setFeedback({ message: '', visible: false });
+    setFlashStatus(null);
+  }, []);
+
+  // ── Derived values for HUD ────────────────────────────────────────────────
+  const descentProgress = dropCount;
+  const modeLabel = descentComplete
+    ? 'LEVEL 2 COMPLETE! 🏅'
+    : `Descent: Floor ${dropCount + 1} of ${TOTAL_DESCENT_DROPS}`;
+
+  return {
+    // World
+    worldOffset,
+    floors,
+    activeFloorId,
+    // Progress
+    dropCount,
+    descentComplete,
+    // Hero
+    heroWorldX,
+    heroWorldY,
+    heroPhase,
+    heroFaceDir,
+    // UI
+    inputLocked,
+    feedback,
+    flashStatus,
+    // HUD
+    descentProgress,
+    modeLabel,
+    // Actions
+    handleTileClick,
+    resetDescent,
+  };
+}

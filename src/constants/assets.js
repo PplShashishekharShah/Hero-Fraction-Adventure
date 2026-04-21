@@ -23,6 +23,17 @@ export const ASSETS = {
   rightSky:        '/assets/right_sky.png',
   sfxCorrect:      '/assets/correct.wav',
   sfxIncorrect:    '/assets/incorrect.wav',
+
+  // ── Descent Mode (Mode 2) ──────────────────────────────────────────────
+  interiorBg:      '/assets/interior_building_bg2.png',
+  floorBase:       '/assets/floor_base.png',
+  floorRailing:    '/assets/floor_railing.png',
+  floorIdle:       '/assets/idle_floor.png',
+  floorCorrect:    '/assets/correct_floor.png',
+  floorWrong:      '/assets/wrong_floor.png',
+  floorCrack:      '/assets/crack_floor.png',
+  floorBroken:     '/assets/broken_floor.png',
+  walking:         '/assets/walking.gif',
 };
 
 // ─── Viewport constants ───────────────────────────────────────────────────────

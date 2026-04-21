@@ -1,7 +1,8 @@
 /**
- * ProgressBar — shows climb count and a coloured fill strip.
+ * ProgressBar — shows step count and a coloured fill strip.
+ * accentColor defaults to climb-mode teal; descent mode passes purple.
  */
-export default function ProgressBar({ progress, total }) {
+export default function ProgressBar({ progress, total, accentColor = '#1de9b6' }) {
   const pct = Math.round((progress / total) * 100);
 
   return (
@@ -31,18 +32,18 @@ export default function ProgressBar({ progress, total }) {
       >
         <div
           style={{
-            height:       '100%',
-            width:        `${pct}%`,
-            background:   'linear-gradient(90deg, #1de9b6, #00b0ff, #1de9b6)',
+            height:         '100%',
+            width:          `${pct}%`,
+            background:     `linear-gradient(90deg, ${accentColor}, ${accentColor}bb, ${accentColor})`,
             backgroundSize: '200% 100%',
-            borderRadius: 12,
-            transition:   'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-            boxShadow:    '0 0 15px rgba(29, 233, 182, 0.6)',
+            borderRadius:   12,
+            transition:     'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow:      `0 0 15px ${accentColor}99`,
           }}
         />
       </div>
 
-      <span style={{ fontSize: 16, color: '#1de9b6', fontWeight: 900, width: 45 }}>
+      <span style={{ fontSize: 16, color: accentColor, fontWeight: 900, width: 45 }}>
         {pct}%
       </span>
     </div>
