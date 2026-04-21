@@ -24,13 +24,14 @@ export default function FractionFloorTile({ fraction, tileState, disabled, onCli
 
   const src      = (TILE_IMAGES[tileState] ?? TILE_IMAGES.idle)();
   const isIdle   = tileState === 'idle';
+  const isSelected = tileState === 'selected';
   const isWrong  = tileState === 'wrong';
   const isBroken = tileState === 'broken';
 
   // Glow / shake filters
   const filter = isWrong
     ? 'drop-shadow(0 0 10px #ff4444) brightness(1.1)'
-    : (hovered && isIdle && !disabled)
+    : (isSelected || (hovered && isIdle && !disabled))
     ? 'drop-shadow(0 0 10px #ffe740) brightness(1.15)'
     : tileState === 'correct'
     ? 'drop-shadow(0 0 10px #1de9b6) brightness(1.1)'
@@ -51,6 +52,10 @@ export default function FractionFloorTile({ fraction, tileState, disabled, onCli
         userSelect: 'none',
         // shake on wrong answer (CSS keyframe defined in index.css)
         animation:  isWrong ? 'tileShake 0.45s ease' : 'none',
+        // CSS Highlight for selected state
+        border: isSelected ? 'rgba(255, 231, 64, 0.2)' : 'transparent',
+        borderRadius: 8,
+        transition: 'background-color 0.3s ease',
       }}
     >
       {/* ── Tile background image ── */}

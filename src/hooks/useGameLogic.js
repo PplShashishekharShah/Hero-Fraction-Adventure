@@ -216,7 +216,7 @@ export function useGameLogic() {
                 setHeroDirection(null);
                 setInputLocked(false);
               }, 1000);
-            }, 1500); // backflip duration
+            }, 1300); // backflip duration
           }, 700); // climb duration
 
         } else {

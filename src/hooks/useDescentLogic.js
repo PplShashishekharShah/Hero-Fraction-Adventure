@@ -200,6 +200,9 @@ export function useDescentLogic() {
     setWalkDuration(calculatedDuration);
     setHeroPhase('moving_to_tile');
     setHeroWorldX(tileX);
+    
+    // Highlight the chosen tile immediately
+    updateTile(floorId, side, 'selected');
 
     // 2. After walking transition, start drilling
     delay(() => {
