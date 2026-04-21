@@ -61,7 +61,6 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir, walkD
         height:          heroImgHeight,
         objectFit:       'contain',
         zIndex:          20,
-        transition,
         // Flip horizontally when facing left, scale UP, and NUDGE DOWN if drilling
         transform:       `scaleX(${faceDir === 'left' ? -1 : 1}) ${isDrilling ? 'scale(1.4) translateY(18px)' : 'scale(1)'}`,
         transformOrigin: 'center bottom',

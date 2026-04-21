@@ -3,7 +3,6 @@ import { ASSETS, VP_W, VP_H } from '../constants/assets';
 import AnchorPad     from './AnchorPad';
 import Hero          from './Hero';
 import WebLine       from './WebLine';
-import FeedbackToast from './FeedbackToast';
 import WinScreen     from './WinScreen';
 
 // ─── Building strip (scroll triggered per climb) ───────────────────────────
@@ -198,13 +197,6 @@ export default function GameViewport({
       >
         {round.mode === 'intro' ? 'INTRO MODE' : 'CLIMB MODE'}
       </div>
-
-      {/* ── Feedback toast ── */}
-      <FeedbackToast
-        message={feedback.message}
-        type={feedback.type}
-        visible={feedback.visible}
-      />
 
       {/* ── Web line ── */}
       <WebLine start={heroPos} end={weblineEnd} visible={weblineVisible} />

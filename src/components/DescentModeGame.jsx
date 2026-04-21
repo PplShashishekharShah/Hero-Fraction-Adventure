@@ -4,7 +4,6 @@ import { TOTAL_DESCENT_DROPS } from '../data/descentRounds';
 import { useDescentLogic }     from '../hooks/useDescentLogic';
 import FloorRow          from './FloorRow';
 import HeroRunner        from './HeroRunner';
-import FeedbackToast     from './FeedbackToast';
 import DescentWinScreen  from './DescentWinScreen';
 
 /**
@@ -204,13 +203,6 @@ export default function DescentModeGame({ onClimbAgain }) {
             </div>
           );
         })}
-
-        {/* ── Feedback toast ── */}
-        <FeedbackToast
-          message={feedback.message}
-          type="wrong"
-          visible={feedback.visible}
-        />
 
         {/* ── Correct / wrong flash overlay ── */}
         {flashStatus && (
