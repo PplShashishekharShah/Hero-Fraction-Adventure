@@ -16,7 +16,7 @@ export const ASSETS = {
   anchorBreak:     '/assets/anchor_pads_break.png',
   plate:           '/assets/fraction_display_plate.png',
   webline:         '/assets/webline.png',
-  backflip:        '/assets/backflip2.gif',
+  backflip:        '/assets/backflip_final.gif',
   leftTerrace:     '/assets/left_terrace_top.png',
   rightTerrace:    '/assets/right_terrace_top.png',
   leftSky:         '/assets/left_sky.png',
@@ -36,6 +36,7 @@ export const ASSETS = {
   walking:         '/assets/walking.gif',
   tunnel:          '/assets/tunnel3.png',
   drill:           '/assets/drill2.gif',
+  drillSfx:        '/assets/drill_sound.wav',
 };
 
 // ─── Viewport constants ───────────────────────────────────────────────────────

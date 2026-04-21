@@ -43,7 +43,7 @@ export const GAME_CONFIG = {
 export const DESCENT_LAYOUT = {
   // ── Floor positions ───────────────────────────────────────────────────────
   upperRailingY:  145,   // screen Y of upper floor railing-top when worldOffset=0
-  floorStep:      280,   // distance (px) between consecutive floor railing-tops
+  floorStep:      270,   // distance (px) between consecutive floor railing-tops
   //   → lower railing Y = 145 + 280 = 425
   //   → 3rd floor (hidden) = 145 + 436 = 581  (just below 560px viewport)
 

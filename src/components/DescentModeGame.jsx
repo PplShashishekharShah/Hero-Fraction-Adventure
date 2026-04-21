@@ -133,15 +133,9 @@ export default function DescentModeGame({ onClimbAgain }) {
           ⬇️ DESCENT MODE
         </div>
 
-        {/* ── Floor layers ─────────────────────────────────────────────────
-             Each floor div is independently positioned using:
-               top = floor.worldY - worldOffset
-             All divs share the same `transition: top Xms` duration.
-             When worldOffset changes in one render, every floor animates
-             upward simultaneously → synchronized scroll illusion.          */}
+        {/* ── Layer 1: Floor Backgrounds (Base + Tiles) ─────────────────────── */}
         {floors.map(floor => {
           const screenY    = floor.worldY - worldOffset;
-          // Fade out floors leaving top; fade in floors entering from bottom
           const isExiting  = screenY < -DESCENT_LAYOUT.railingHeight - 20;
           const isEntering = screenY > VP_H + 10;
           const opacity    = (isExiting || isEntering) ? 0 : 1;
@@ -149,7 +143,7 @@ export default function DescentModeGame({ onClimbAgain }) {
 
           return (
             <div
-              key={floor.id}
+              key={`${floor.id}-bg`}
               style={{
                 position:      'absolute',
                 top:           screenY,
@@ -165,15 +159,13 @@ export default function DescentModeGame({ onClimbAgain }) {
                 floor={floor}
                 isActive={isActive}
                 onTileClick={handleTileClick}
+                layer="background"
               />
             </div>
           );
         })}
 
-        {/* ── Hero ─────────────────────────────────────────────────────────
-             screenX = heroWorldX (no horizontal world offset)
-             screenY = heroWorldY - worldOffset (recomputed each render)
-             HeroRunner manages its own CSS transitions per phase.           */}
+        {/* ── Layer 2: Hero ───────────────────────────────────────────────── */}
         <HeroRunner
           screenX={heroWorldX}
           screenY={heroScreenY}
@@ -181,6 +173,37 @@ export default function DescentModeGame({ onClimbAgain }) {
           faceDir={heroFaceDir}
           walkDuration={walkDuration}
         />
+
+        {/* ── Layer 3: Floor Foreground (Railing) ─────────────────────────── */}
+        {floors.map(floor => {
+          const screenY    = floor.worldY - worldOffset;
+          const isExiting  = screenY < -DESCENT_LAYOUT.railingHeight - 20;
+          const isEntering = screenY > VP_H + 10;
+          const opacity    = (isExiting || isEntering) ? 0 : 1;
+
+          return (
+            <div
+              key={`${floor.id}-fg`}
+              style={{
+                position:      'absolute',
+                top:           screenY,
+                left:          0,
+                right:         0,
+                opacity,
+                transition:    `top ${SCROLL_MS}ms ${SCROLL_EASE}, opacity ${SCROLL_MS}ms ease`,
+                zIndex:        25, // Higher than hero (20)
+                pointerEvents: 'none',
+              }}
+            >
+              <FloorRow
+                floor={floor}
+                isActive={false}
+                onTileClick={() => {}}
+                layer="foreground"
+              />
+            </div>
+          );
+        })}
 
         {/* ── Feedback toast ── */}
         <FeedbackToast

@@ -44,7 +44,7 @@ export default function FractionFloorTile({ fraction, tileState, disabled, onCli
       style={{
         position:   'relative',
         left: "60px",
-        top: "42px",
+        top: "48px",
         width:      DESCENT_LAYOUT.tileWidth,
         height:     DESCENT_LAYOUT.tileHeight,
         cursor:     (disabled || isBroken) ? 'default' : 'pointer',
@@ -66,6 +66,10 @@ export default function FractionFloorTile({ fraction, tileState, disabled, onCli
           display:    'block',
           filter,
           transition: 'filter 0.2s ease',
+          // ADDED: Border to highlight tile for user interaction
+          border:     isBroken ? 'none' : `2px solid ${isWrong ? '#ff4444' : 'rgba(255, 231, 64, 0.5)'}`,
+          borderRadius: 8,
+          boxShadow:  isBroken ? 'none' : `0 0 15px ${isWrong ? 'rgba(255,68,68,0.4)' : 'rgba(255,231,64,0.2)'}`,
         }}
       />
 

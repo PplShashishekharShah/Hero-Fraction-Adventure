@@ -14,7 +14,7 @@ import FractionFloorTile from './FractionFloorTile';
  *   The two copies overlap in the centre by 20% — this hides the seam and
  *   fills the viewport width perfectly.
  */
-export default function FloorRow({ floor, isActive, onTileClick }) {
+export default function FloorRow({ floor, isActive, onTileClick, layer = 'all' }) {
   const {
     railingHeight, baseHeight,
     leftTileX, rightTileX,
@@ -27,10 +27,8 @@ export default function FloorRow({ floor, isActive, onTileClick }) {
   // covering 58+58-16 = 100% of the viewport width seamlessly.
   const pieceW = Math.round(VP_W * 0.58); // ≈ 522px for VP_W=900
 
-  return (
-    <div style={{ position: 'relative', width: VP_W, height: rowHeight }}>
-
-      {/* ── Railing: two images side-by-side ── */}
+  const renderRailing = () => (
+    <>
       {/* Left piece */}
       <img
         src={ASSETS.floorRailing}
@@ -38,7 +36,7 @@ export default function FloorRow({ floor, isActive, onTileClick }) {
         draggable={false}
         style={{
           position:  'absolute',
-          top:       25,
+          top:       31,
           left:      45,
           width:     pieceW,
           height:    railingHeight,
@@ -55,7 +53,7 @@ export default function FloorRow({ floor, isActive, onTileClick }) {
         draggable={false}
         style={{
           position:       'absolute',
-          top:            25,
+          top:            31,
           right:          39,
           width:          pieceW,
           height:         railingHeight,
@@ -66,7 +64,11 @@ export default function FloorRow({ floor, isActive, onTileClick }) {
           pointerEvents:  'none',
         }}
       />
+    </>
+  );
 
+  const renderBackground = () => (
+    <>
       {/* ── Base: two images side-by-side ── */}
       {/* Left piece */}
       <img
@@ -160,6 +162,13 @@ export default function FloorRow({ floor, isActive, onTileClick }) {
           }}
         />
       )}
+    </>
+  );
+
+  return (
+    <div style={{ position: 'relative', width: VP_W, height: rowHeight }}>
+      {(layer === 'all' || layer === 'background') && renderBackground()}
+      {(layer === 'all' || layer === 'foreground') && renderRailing()}
     </div>
   );
 }

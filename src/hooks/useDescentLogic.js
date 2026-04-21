@@ -204,6 +204,11 @@ export function useDescentLogic() {
     // 2. After walking transition, start drilling
     delay(() => {
       setHeroPhase('drilling');
+      
+      // Play drilling audio
+      const sfx = new Audio(ASSETS.drillSfx);
+      sfx.volume = 0.4;
+      sfx.play().catch(() => {});
 
       // 3. After drilling duration, apply result
       delay(() => {

@@ -4,6 +4,7 @@ import { ASSETS, VP_W }         from '../constants/assets';
 import { TOTAL_CLIMBS }         from '../data/rounds';
 import GameHUD                  from '../components/GameHUD';
 import GameViewport             from '../components/GameViewport';
+import BirdsDecoration         from '../components/BirdsDecoration';
 import ModeTransitionOverlay    from '../components/ModeTransitionOverlay';
 import DescentModeGame          from '../components/DescentModeGame';
 
@@ -133,6 +134,8 @@ export default function FractionClimbGame() {
             modeLabel={modeLabel}
             gameMode="climb"
           />
+
+          <BirdsDecoration />
 
           <GameViewport
             round={round}
