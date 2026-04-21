@@ -35,6 +35,7 @@ export default function DescentModeGame({ onClimbAgain }) {
     activeFloorId,
     dropCount,
     descentComplete,
+    showResults,
     heroWorldX,
     heroWorldY,
     heroPhase,
@@ -202,12 +203,29 @@ export default function DescentModeGame({ onClimbAgain }) {
           />
         )}
 
-        {/* ── Descent complete overlay ── */}
+        {/* ── Final Blackout Overlay (covers everything) ── */}
         {descentComplete && (
-          <DescentWinScreen
-            onPlayAgainDescent={resetDescent}
-            onClimbAgain={onClimbAgain}
-          />
+           <div 
+             style={{ 
+               position:      'fixed', 
+               inset:         0, 
+               background:    '#000', 
+               zIndex:        2000, 
+               animation:     'fadeIn 0.6s ease-in forwards',
+               pointerEvents: 'all',
+             }} 
+           />
+        )}
+
+        {/* ── Descent complete overlay (Win Screen) ── */}
+        {/* We keep it at z-index 2001 so it pops up ABOVE the pure black overlay */}
+        {showResults && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 2001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <DescentWinScreen
+              onPlayAgainDescent={resetDescent}
+              onClimbAgain={onClimbAgain}
+            />
+          </div>
         )}
       </div>
 

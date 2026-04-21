@@ -26,7 +26,8 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir }) {
 
   // ── Image selection ──────────────────────────────────────────────────────
   // Use walking.gif while patrolling, static character.png otherwise
-  const src = heroPhase === 'walking' ? ASSETS.walking : ASSETS.character;
+  // Use walking.gif while patrolling or exiting, static character.png otherwise
+  const src = (heroPhase === 'walking' || heroPhase === 'exiting') ? ASSETS.walking : ASSETS.character;
 
   // ── CSS transition per phase ─────────────────────────────────────────────
   // KEY design: 'landing' phase transition duration matches scrollDurationMs so
@@ -38,6 +39,8 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir }) {
       ? `left 200ms ease, top ${scrollDurationMs}ms cubic-bezier(0.42, 0, 0.58, 1)`
       : heroPhase === 'paused'
       ? `left 220ms ease`           // smooth X alignment to tile centre
+      : (heroPhase === 'exiting' || heroPhase === 'vanished')
+      ? `left 2200ms linear`        // long linear walk off-screen
       : 'none';                     // 'walking' — no transition, raw rAF speed
 
   return (
@@ -60,6 +63,9 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir }) {
         filter:          'drop-shadow(0 3px 8px #000b)',
         pointerEvents:   'none',
         imageRendering:  'auto',
+        opacity:         heroPhase === 'vanished' ? 0 : 1,
+        // Added opacity transition for vanishing
+        transition:      transition + (transition !== 'none' ? ', opacity 0.5s ease' : 'opacity 0.5s ease'),
       }}
     />
   );

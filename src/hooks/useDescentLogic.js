@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { DESCENT_ROUNDS, TOTAL_DESCENT_DROPS } from '../data/descentRounds';
-import { ASSETS } from '../constants/assets';
+import { ASSETS, VP_W } from '../constants/assets';
 import { GAME_CONFIG, DESCENT_LAYOUT } from '../constants/gameConfig';
 
 const {
@@ -64,7 +64,8 @@ export function useDescentLogic() {
   // ── Progress ─────────────────────────────────────────────────────────────
   // dropCount = number of successful drops = DESCENT_ROUNDS index of active floor.
   const [dropCount,       setDropCount]       = useState(0);
-  const [descentComplete, setDescentComplete] = useState(false);
+  const [descentComplete, setDescentComplete] = useState(false); // Triggers blackout
+  const [showResults,     setShowResults]     = useState(false); // Triggers WinScreen
 
   // ── Hero state ───────────────────────────────────────────────────────────
   const [heroWorldY,  setHeroWorldY]  = useState(upperRailingY + heroFeetFromRailingY);
@@ -147,7 +148,22 @@ export function useDescentLogic() {
 
   /** Append a new floor to the floors array (idempotent — skips if already there). */
   const spawnFloor = useCallback((roundIndex) => {
-    const newFloor = makeFloor(roundIndex);
+    // If roundIndex is TOTAL_DESCENT_DROPS, it's the blank final landing floor
+    const isBlank = roundIndex >= TOTAL_DESCENT_DROPS;
+    
+    let newFloor;
+    if (isBlank) {
+       newFloor = {
+         id: `final-floor-${roundIndex}`,
+         worldY: upperRailingY + roundIndex * floorStep,
+         isBlank: true,
+         leftState: 'idle',
+         rightState: 'idle',
+       };
+    } else {
+       newFloor = makeFloor(roundIndex);
+    }
+
     if (!newFloor) return;
     setFloors(prev =>
       prev.some(f => f.id === newFloor.id) ? prev : [...prev, newFloor]
@@ -199,7 +215,8 @@ export function useDescentLogic() {
         spawnFloor(nextDrop + 2);
 
         // Move hero X to tile centre (CSS transition via 'paused' phase)
-        setHeroWorldX(tileX);
+        // Adjusted with +25px for better visual centering (GIF character is slightly off-mid)
+        setHeroWorldX(tileX + 35);
 
         // Step 4 — after align pause, hero falls
         delay(() => {
@@ -213,26 +230,41 @@ export function useDescentLogic() {
             // hero slides upward in perfect sync with the floor scroll below.
             setHeroPhase('landing');
 
-            // Step 6 — after landing pause, trigger the world scroll
+            // Step 6 — after landing pause, trigger the world scroll OR end sequence
             delay(() => {
-              // ALL floor divs and the hero's screenY change simultaneously here.
-              // Every element has transition: top Xms → they all animate together.
-              setWorldOffset(prev => prev + floorStep);
-              setDropCount(nextDrop);
+              const isLastDrop = nextDrop >= TOTAL_DESCENT_DROPS;
 
-              // Step 7 — after scroll animation, resume
-              delay(() => {
-                if (nextDrop >= TOTAL_DESCENT_DROPS) {
-                  setDescentComplete(true);
+              if (isLastDrop) {
+                // FINAL DROP: No scroll. Start victory walk to tunnel.
+                setDropCount(nextDrop);
+                setHeroPhase('exiting');
+                setHeroFaceDir('right');   // Face the tunnel
+                setHeroWorldX(VP_W + 200); // Walk extreme right into tunnel
+                
+                // NEW: Cinematic sequence (Vanish -> Blackout -> Results)
+                delay(() => setHeroPhase('vanished'), 1200); // Start fading as he gets deep in tunnel
+                
+                delay(() => {
+                  setDescentComplete(true); // Triggers blackout
+                }, 2200);
+
+                delay(() => {
+                  setShowResults(true);    // Triggers WinScreen
                   setInputLocked(false);
-                } else {
+                }, 3000); 
+              } else {
+                // ALL floor divs and the hero's screenY change simultaneously here.
+                setWorldOffset(prev => prev + floorStep);
+                setDropCount(nextDrop);
+
+                // Step 7 — after scroll animation, resume
+                delay(() => {
                   setHeroPhase('walking');
                   heroDirRef.current = 1;
                   setHeroFaceDir('right');
                   setInputLocked(false);
-                }
-              }, GAME_CONFIG.scrollDurationMs + 120);
-
+                }, GAME_CONFIG.scrollDurationMs + 120);
+              }
             }, GAME_CONFIG.landingPauseMs);
           }, GAME_CONFIG.fallDurationMs);
         }, GAME_CONFIG.alignMs);
@@ -278,6 +310,8 @@ export function useDescentLogic() {
     setHeroFaceDir('right');
     heroDirRef.current = 1;
     setInputLocked(false);
+    setDescentComplete(false);
+    setShowResults(false);
     setFeedback({ message: '', visible: false });
     setFlashStatus(null);
   }, []);
@@ -296,6 +330,7 @@ export function useDescentLogic() {
     // Progress
     dropCount,
     descentComplete,
+    showResults,
     // Hero
     heroWorldX,
     heroWorldY,

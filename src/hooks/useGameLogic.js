@@ -175,11 +175,14 @@ export function useGameLogic() {
                     setHeroPos(rooftopPos);
 
                     delay(() => {
-                      setHeroState('idle'); // Final static character show - no backflip on roof
-                      setWeblineVisible(false);
-                      setHeroDirection(null);
-                      setWon(true); 
                       setInputLocked(false);
+                      setWon(true); 
+
+                      // NEW: Start victory walk off-screen
+                      delay(() => {
+                        setHeroState('victory_walk');
+                        setHeroPos({ x: VP_W + 250, y: rooftopPos.y });
+                      }, 400);
                     }, 700); // final climb duration
                   }, 600); // final shooting delay
                 }, 1000); // pause after last anchor backflip

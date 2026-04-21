@@ -17,6 +17,7 @@ export default function Hero({ x, y, heroState, heroDirection, scale = 1 }) {
 
     if (heroState === 'backflip') return ASSETS.backflip;
     if (isFalling) return ASSETS.characterFall;
+    if (heroState === 'victory_walk') return ASSETS.walking;
     
     if (isAction) {
       if (heroDirection === 'left')  return ASSETS.shootLeft;

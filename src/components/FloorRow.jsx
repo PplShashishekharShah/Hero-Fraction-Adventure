@@ -104,39 +104,62 @@ export default function FloorRow({ floor, isActive, onTileClick }) {
         }}
       />
 
-      {/* ── Left fraction tile ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top:      railingHeight - Math.round(tileHeight * 0.35),
-          left:     leftTileX - Math.round(tileWidth / 2),
-          zIndex:   4,
-        }}
-      >
-        <FractionFloorTile
-          fraction={floor.leftFraction}
-          tileState={floor.leftState}
-          disabled={!isActive}
-          onClick={() => onTileClick('left', floor.id)}
-        />
-      </div>
+      {/* ── Fraction tiles (Only if not blank) ── */}
+      {!floor.isBlank && (
+        <>
+          {/* Left fraction tile */}
+          <div
+            style={{
+              position: 'absolute',
+              top:      railingHeight - Math.round(tileHeight * 0.35),
+              left:     leftTileX - Math.round(tileWidth / 2),
+              zIndex:   4,
+            }}
+          >
+            <FractionFloorTile
+              fraction={floor.leftFraction}
+              tileState={floor.leftState}
+              disabled={!isActive}
+              onClick={() => onTileClick('left', floor.id)}
+            />
+          </div>
 
-      {/* ── Right fraction tile ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top:      railingHeight - Math.round(tileHeight * 0.35),
-          left:     rightTileX - Math.round(tileWidth / 2),
-          zIndex:   4,
-        }}
-      >
-        <FractionFloorTile
-          fraction={floor.rightFraction}
-          tileState={floor.rightState}
-          disabled={!isActive}
-          onClick={() => onTileClick('right', floor.id)}
+          {/* Right fraction tile */}
+          <div
+            style={{
+              position: 'absolute',
+              top:      railingHeight - Math.round(tileHeight * 0.35),
+              left:     rightTileX - Math.round(tileWidth / 2),
+              zIndex:   4,
+            }}
+          >
+            <FractionFloorTile
+              fraction={floor.rightFraction}
+              tileState={floor.rightState}
+              disabled={!isActive}
+              onClick={() => onTileClick('right', floor.id)}
+            />
+          </div>
+        </>
+      )}
+
+      {/* ── Tunnel exit (Only on the final landing floor) ── */}
+      {floor.isBlank && (
+        <img
+          src={ASSETS.tunnel}
+          alt="Exit Tunnel"
+          draggable={false}
+          style={{
+            position: 'absolute',
+            bottom:   baseHeight - 25,
+            right:    -25,
+            width:    130,
+            height:   'auto',
+            zIndex:   5,
+            pointerEvents: 'none',
+          }}
         />
-      </div>
+      )}
     </div>
   );
 }

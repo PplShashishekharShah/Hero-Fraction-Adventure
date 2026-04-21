@@ -42,12 +42,10 @@ export default function FractionClimbGame() {
 
   // ── Watch for climb-mode win → start transition ────────────────────────────
   useEffect(() => {
-    if (won && gamePhase === 'climb') {
-      // Brief delay so the rooftop landing animation has time to settle
-      const t = setTimeout(() => setGamePhase('transitioning'), 1800);
-      return () => clearTimeout(t);
+    if (won && gamePhase === 'climb' && heroPos.x > VP_W + 180) {
+      setGamePhase('transitioning');
     }
-  }, [won, gamePhase]);
+  }, [won, gamePhase, heroPos.x]);
 
   // Called by ModeTransitionOverlay at the midpoint of the black hold phase.
   // Parent switches to 'descent' here — the overlay then fades out revealing it.

@@ -4,9 +4,9 @@
  */
 export const GAME_CONFIG = {
   // ── Mode transition (climb → descent) ────────────────────────────────────
-  levelTransitionFadeOutMs:   600,
+  levelTransitionFadeOutMs:   900,
   levelTransitionBlackHoldMs: 1200,
-  levelTransitionFadeInMs:    600,
+  levelTransitionFadeInMs:    900,
 
   // ── Descent: tile break sequence ─────────────────────────────────────────
   correctStateMs: 300,   // idle  → correct (glow)
@@ -55,7 +55,7 @@ export const DESCENT_LAYOUT = {
 
   // ── Fraction tile positions (center X) ───────────────────────────────────
   leftTileX:  238,       // left tile center X
-  rightTileX: 662,       // right tile center X
+  rightTileX: 580,       // right tile center X — moved left to align with right door
   tileWidth:  160,       // width of each fraction tile (idle_floor.png, etc.)
   tileHeight: 58,        // height of each fraction tile
 
