@@ -40,6 +40,7 @@ export default function DescentModeGame({ onClimbAgain }) {
     heroWorldY,
     heroPhase,
     heroFaceDir,
+    walkDuration,
     inputLocked,
     feedback,
     flashStatus,
@@ -178,6 +179,7 @@ export default function DescentModeGame({ onClimbAgain }) {
           screenY={heroScreenY}
           heroPhase={heroPhase}
           faceDir={heroFaceDir}
+          walkDuration={walkDuration}
         />
 
         {/* ── Feedback toast ── */}

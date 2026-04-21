@@ -72,6 +72,7 @@ export function useDescentLogic() {
   const [heroWorldX,  setHeroWorldX]  = useState(patrolLeftX + 60);
   const [heroPhase,   setHeroPhase]   = useState('walking'); // 'walking'|'paused'|'falling'|'landing'
   const [heroFaceDir, setHeroFaceDir] = useState('right');
+  const [walkDuration, setWalkDuration] = useState(450); // ms
   const heroDirRef = useRef(1); // 1 = right, -1 = left (mutable ref avoids rAF restarts)
 
   // ── UI ───────────────────────────────────────────────────────────────────
@@ -188,12 +189,19 @@ export function useDescentLogic() {
     const tileX     = (side === 'left' ? leftTileX : rightTileX) + 35;
 
     // 1. Lock input and start walking to the tile
+    // Calculate walking time based on patrol speed (110 px/s)
+    const distanceToTile = Math.abs(heroWorldX - tileX);
+    const calculatedDuration = Math.max(200, (distanceToTile / GAME_CONFIG.patrolSpeedPxPerSecond) * 1000);
+    
     setInputLocked(true);
-    setHeroFaceDir(heroWorldX > tileX ? 'left' : 'right');
+    const targetDir = heroWorldX > tileX ? 'left' : 'right';
+    setHeroFaceDir(targetDir);
+    heroDirRef.current = targetDir === 'right' ? 1 : -1; // Sync patrol direction
+    setWalkDuration(calculatedDuration);
     setHeroPhase('moving_to_tile');
     setHeroWorldX(tileX);
 
-    // 2. After walking transition (450ms), start drilling
+    // 2. After walking transition, start drilling
     delay(() => {
       setHeroPhase('drilling');
 
@@ -269,7 +277,7 @@ export function useDescentLogic() {
         }
       }, GAME_CONFIG.drillDurationMs);
 
-    }, 450); // Matching 'moving_to_tile' CSS transition duration in HeroRunner
+    }, calculatedDuration);
 
   }, [
     inputLocked, descentComplete, activeFloorId, floors, dropCount, heroWorldX,
@@ -316,6 +324,7 @@ export function useDescentLogic() {
     heroWorldY,
     heroPhase,
     heroFaceDir,
+    walkDuration,
     // UI
     inputLocked,
     feedback,
