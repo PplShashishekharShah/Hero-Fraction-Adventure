@@ -35,6 +35,7 @@ export const ASSETS = {
   floorBroken:     '/assets/broken_floor.png',
   walking:         '/assets/walking.gif',
   tunnel:          '/assets/tunnel3.png',
+  drill:           '/assets/drill2.gif',
 };
 
 // ─── Viewport constants ───────────────────────────────────────────────────────

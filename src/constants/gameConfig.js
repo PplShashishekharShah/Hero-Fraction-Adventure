@@ -24,6 +24,9 @@ export const GAME_CONFIG = {
   // ── Descent: wrong answer ────────────────────────────────────────────────
   wrongStateMs: 750,     // wrong tile shown before resetting to idle
 
+  // ── Descent: drilling animation ──────────────────────────────────────────
+  drillDurationMs: 1200, // time Spiderman spends drilling before outcome
+
   // ── Descent: hero patrol ─────────────────────────────────────────────────
   patrolSpeedPxPerSecond: 110,
 };

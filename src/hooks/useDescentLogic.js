@@ -185,114 +185,94 @@ export function useDescentLogic() {
 
     const isCorrect = side === activeFloor.correctSide;
     const nextDrop  = dropCount + 1;
+    const tileX     = (side === 'left' ? leftTileX : rightTileX) + 35;
 
-    // Lock input immediately
+    // 1. Lock input and start walking to the tile
     setInputLocked(true);
-    setHeroPhase('paused');
+    setHeroFaceDir(heroWorldX > tileX ? 'left' : 'right');
+    setHeroPhase('moving_to_tile');
+    setHeroWorldX(tileX);
 
-    if (isCorrect) {
-      // ── CORRECT SEQUENCE ─────────────────────────────────────────────────
-      triggerFeedback('correct');
+    // 2. After walking transition (450ms), start drilling
+    delay(() => {
+      setHeroPhase('drilling');
 
-      // Pre-compute hero's next world Y (on the lower floor after this drop)
-      const nextHeroWorldY = upperRailingY + nextDrop * floorStep + heroFeetFromRailingY;
-
-      // Tile X the hero should align to before falling
-      const tileX = side === 'left' ? leftTileX : rightTileX;
-
-      // Step 1 — tile glows (correct state)
-      updateTile(floorId, side, 'correct');
-
-      // Step 2 — crack (after correctStateMs)
-      delay(() => updateTile(floorId, side, 'crack'), GAME_CONFIG.correctStateMs);
-
-      // Step 3 — broken + hero alignment (after correct + crack)
+      // 3. After drilling duration, apply result
       delay(() => {
-        updateTile(floorId, side, 'broken');
+        if (isCorrect) {
+          // ── CORRECT SEQUENCE ─────────────────────────────────────────────
+          triggerFeedback('correct');
+          updateTile(floorId, side, 'correct');
 
-        // Pre-spawn the floor TWO ahead of the next active floor so it is
-        // already in the DOM before the world scroll fires.
-        spawnFloor(nextDrop + 2);
+          // Crack the floor
+          delay(() => updateTile(floorId, side, 'crack'), GAME_CONFIG.correctStateMs);
 
-        // Move hero X to tile centre (CSS transition via 'paused' phase)
-        // Adjusted with +25px for better visual centering (GIF character is slightly off-mid)
-        setHeroWorldX(tileX + 35);
-
-        // Step 4 — after align pause, hero falls
-        delay(() => {
-          setHeroPhase('falling');
-          // heroWorldY change triggers the CSS fall transition (ease-in, fallDurationMs)
-          setHeroWorldY(nextHeroWorldY);
-
-          // Step 5 — after fall completes, landing phase
+          // Break the floor and fall
           delay(() => {
-            // 'landing' phase sets hero transition to scrollDurationMs so the
-            // hero slides upward in perfect sync with the floor scroll below.
-            setHeroPhase('landing');
+            updateTile(floorId, side, 'broken');
+            spawnFloor(nextDrop + 2);
+            
+            setHeroPhase('falling');
+            const nextHeroWorldY = upperRailingY + nextDrop * floorStep + heroFeetFromRailingY;
+            setHeroWorldY(nextHeroWorldY);
 
-            // Step 6 — after landing pause, trigger the world scroll OR end sequence
+            // Land
             delay(() => {
-              const isLastDrop = nextDrop >= TOTAL_DESCENT_DROPS;
+              setHeroPhase('landing');
 
-              if (isLastDrop) {
-                // FINAL DROP: No scroll. Start victory walk to tunnel.
-                setDropCount(nextDrop);
-                setHeroPhase('exiting');
-                setHeroFaceDir('right');   // Face the tunnel
-                setHeroWorldX(VP_W + 200); // Walk extreme right into tunnel
-                
-                // NEW: Cinematic sequence (Vanish -> Blackout -> Results)
-                delay(() => setHeroPhase('vanished'), 1200); // Start fading as he gets deep in tunnel
-                
-                delay(() => {
-                  setDescentComplete(true); // Triggers blackout
-                }, 2200);
-
-                delay(() => {
-                  setShowResults(true);    // Triggers WinScreen
-                  setInputLocked(false);
-                }, 3000); 
-              } else {
-                // ALL floor divs and the hero's screenY change simultaneously here.
-                setWorldOffset(prev => prev + floorStep);
-                setDropCount(nextDrop);
-
-                // Step 7 — after scroll animation, resume
-                delay(() => {
-                  setHeroPhase('walking');
-                  heroDirRef.current = 1;
+              // Scroll or End
+              delay(() => {
+                const isLastDrop = nextDrop >= TOTAL_DESCENT_DROPS;
+                if (isLastDrop) {
+                  // End sequence
+                  setDropCount(nextDrop);
+                  setHeroPhase('exiting');
                   setHeroFaceDir('right');
-                  setInputLocked(false);
-                }, GAME_CONFIG.scrollDurationMs + 120);
-              }
-            }, GAME_CONFIG.landingPauseMs);
-          }, GAME_CONFIG.fallDurationMs);
-        }, GAME_CONFIG.alignMs);
+                  setHeroWorldX(VP_W + 200);
+                  delay(() => setHeroPhase('vanished'), 1200);
+                  delay(() => setDescentComplete(true), 2200);
+                  delay(() => { setShowResults(true); setInputLocked(false); }, 3000);
+                } else {
+                  // World scroll
+                  setWorldOffset(prev => prev + floorStep);
+                  setDropCount(nextDrop);
+                  delay(() => {
+                    setHeroPhase('walking');
+                    heroDirRef.current = 1;
+                    setHeroFaceDir('right');
+                    setInputLocked(false);
+                  }, GAME_CONFIG.scrollDurationMs + 120);
+                }
+              }, GAME_CONFIG.landingPauseMs);
+            }, GAME_CONFIG.fallDurationMs);
 
-      }, GAME_CONFIG.correctStateMs + GAME_CONFIG.crackStateMs);
+          }, GAME_CONFIG.correctStateMs + GAME_CONFIG.crackStateMs);
 
-    } else {
-      // ── WRONG SEQUENCE ───────────────────────────────────────────────────
-      triggerFeedback('incorrect');
+        } else {
+          // ── WRONG SEQUENCE ───────────────────────────────────────────────
+          triggerFeedback('incorrect');
+          updateTile(floorId, side, 'wrong');
+          
+          const clicked = side === 'left' ? activeFloor.leftFraction : activeFloor.rightFraction;
+          setFeedback({
+            message: `Oops! ${clicked.numerator}/${clicked.denominator} is LARGER. Pick the smaller one!`,
+            visible: true,
+          });
 
-      const clicked = side === 'left' ? activeFloor.leftFraction : activeFloor.rightFraction;
-      const other   = side === 'left' ? activeFloor.rightFraction : activeFloor.leftFraction;
+          // Resume after a delay
+          delay(() => {
+            updateTile(floorId, side, 'idle');
+            setFeedback(f => ({ ...f, visible: false }));
+            setHeroPhase('walking');
+            setInputLocked(false);
+          }, GAME_CONFIG.wrongStateMs);
+        }
+      }, GAME_CONFIG.drillDurationMs);
 
-      updateTile(floorId, side, 'wrong');
-      setFeedback({
-        message: `Oops! ${clicked.numerator}/${clicked.denominator} is LARGER. Pick the smaller one!`,
-        visible: true,
-      });
+    }, 450); // Matching 'moving_to_tile' CSS transition duration in HeroRunner
 
-      delay(() => {
-        updateTile(floorId, side, 'idle');
-        setFeedback(f => ({ ...f, visible: false }));
-        setHeroPhase('walking');
-        setInputLocked(false);
-      }, GAME_CONFIG.wrongStateMs);
-    }
   }, [
-    inputLocked, descentComplete, activeFloorId, floors, dropCount,
+    inputLocked, descentComplete, activeFloorId, floors, dropCount, heroWorldX,
     updateTile, triggerFeedback, spawnFloor, delay,
   ]);
 

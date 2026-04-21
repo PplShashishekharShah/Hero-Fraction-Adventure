@@ -25,9 +25,10 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir }) {
   const { fallDurationMs, scrollDurationMs } = GAME_CONFIG;
 
   // ── Image selection ──────────────────────────────────────────────────────
-  // Use walking.gif while patrolling, static character.png otherwise
-  // Use walking.gif while patrolling or exiting, static character.png otherwise
-  const src = (heroPhase === 'walking' || heroPhase === 'exiting') ? ASSETS.walking : ASSETS.character;
+  // Use drill.gif when drilling, walking.gif which patrolling/exiting/moving, else static
+  const src = heroPhase === 'drilling'
+    ? ASSETS.drill
+    : (heroPhase === 'walking' || heroPhase === 'exiting' || heroPhase === 'moving_to_tile') ? ASSETS.walking : ASSETS.character;
 
   // ── CSS transition per phase ─────────────────────────────────────────────
   // KEY design: 'landing' phase transition duration matches scrollDurationMs so
@@ -37,8 +38,8 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir }) {
       ? `left 200ms ease, top ${fallDurationMs}ms ease-in`
       : heroPhase === 'landing'
       ? `left 200ms ease, top ${scrollDurationMs}ms cubic-bezier(0.42, 0, 0.58, 1)`
-      : heroPhase === 'paused'
-      ? `left 220ms ease`           // smooth X alignment to tile centre
+      : (heroPhase === 'paused' || heroPhase === 'drilling' || heroPhase === 'moving_to_tile')
+      ? `left 450ms ease-out`       // smooth X alignment to tile centre
       : (heroPhase === 'exiting' || heroPhase === 'vanished')
       ? `left 2200ms linear`        // long linear walk off-screen
       : 'none';                     // 'walking' — no transition, raw rAF speed
