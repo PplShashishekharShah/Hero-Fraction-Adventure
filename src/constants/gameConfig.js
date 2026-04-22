@@ -28,7 +28,7 @@ export const GAME_CONFIG = {
   drillDurationMs: 1200, // time Spiderman spends drilling before outcome
 
   // ── Descent: hero patrol ─────────────────────────────────────────────────
-  patrolSpeedPxPerSecond: 110,
+  patrolSpeedPxPerSecond: 160,
 };
 
 /**
@@ -63,12 +63,12 @@ export const DESCENT_LAYOUT = {
   tileHeight: 58,        // height of each fraction tile
 
   // ── Hero patrol bounds (hero center X) ───────────────────────────────────
-  patrolLeftX:  100,
-  patrolRightX: 800,
+  patrolLeftX:  140,
+  patrolRightX: 750,
 
   // ── Hero image dimensions + feet offset ──────────────────────────────────
-  heroImgWidth:  110,    // rendered hero width
-  heroImgHeight: 140,    // rendered hero height
+  heroImgWidth:  135,    // rendered hero width (matched with climb mode)
+  heroImgHeight: 135,    // rendered hero height (matched with climb mode)
   // image top = screenY - heroFeetOffset  (screenY = hero feet in screen space)
-  heroFeetOffset: 112,
+  heroFeetOffset: 107,
 };

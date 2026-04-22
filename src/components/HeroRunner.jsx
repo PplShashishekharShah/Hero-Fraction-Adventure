@@ -28,6 +28,8 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir, walkD
   // Use drill.gif when drilling, walking.gif which patrolling/exiting/moving, else static
   const src = heroPhase === 'drilling'
     ? ASSETS.drill
+    : heroPhase === 'falling'
+    ? ASSETS.characterFall
     : (heroPhase === 'walking' || heroPhase === 'exiting' || heroPhase === 'moving_to_tile') ? ASSETS.walking : ASSETS.character;
 
   const isDrilling = heroPhase === 'drilling';
@@ -62,7 +64,7 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir, walkD
         objectFit:       'contain',
         zIndex:          20,
         // Flip horizontally when facing left, scale UP, and NUDGE DOWN if drilling
-        transform:       `scaleX(${faceDir === 'left' ? -1 : 1}) ${isDrilling ? 'scale(1.4) translateY(18px)' : 'scale(1)'}`,
+        transform:       `scaleX(${faceDir === 'left' ? -1 : 1}) ${isDrilling ? 'scale(1.3) translateY(13px)' : (heroPhase === 'landing' ? 'scale(1.19)' : 'scale(1)')}`,
         transformOrigin: 'center bottom',
         filter:          'drop-shadow(0 3px 8px #000b)',
         pointerEvents:   'none',
