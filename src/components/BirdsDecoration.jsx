@@ -6,10 +6,10 @@ import React from 'react';
  */
 export default function BirdsDecoration() {
   const birds = [
-    { id: 1, top: '15%', delay: '0s', duration: '22s', size: 20 },
-    { id: 2, top: '25%', delay: '5s', duration: '18s', size: 15 },
+    { id: 1, top: '19%', delay: '0s', duration: '22s', size: 20 },
+    { id: 2, top: '25%', delay: '5s', duration: '18s', size: 25 },
     { id: 3, top: '10%', delay: '12s', duration: '25s', size: 18 },
-    { id: 4, top: '20%', delay: '8s', duration: '20s', size: 12 },
+    { id: 4, top: '30%', delay: '8s', duration: '20s', size: 20 },
   ];
 
   return (

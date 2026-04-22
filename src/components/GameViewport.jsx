@@ -11,7 +11,7 @@ import WinScreen     from './WinScreen';
 // once: translateY(-50%) → translateY(0), creating a downward scroll feel.
 // `forwards` fill-mode keeps end state so buildings don't snap back.
 function ScrollingBuilding({ src, side, isFinal }) {
-  const sideStyle = side === 'left' ? { left: -76 } : { right: -76 };
+  const sideStyle = side === 'left' ? { left: -90 } : { right: -90 };
   return (
     <div
       style={{
@@ -144,10 +144,11 @@ export default function GameViewport({
             alt=""
             style={{
               position: 'absolute',
-              top: 67,
-              left: -95,
-              width: 280,
+              top: 85,
+              left: -130,
+              width: 300,
               height: 'auto',
+              animation: 'terraceSpawn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
             }}
           />
           <img
@@ -155,10 +156,11 @@ export default function GameViewport({
             alt=""
             style={{
               position: 'absolute',
-              top: 67,
-              right: -95,
-              width: 280,
+              top: 85,
+              right: -130,
+              width: 300,
               height: 'auto',
+              animation: 'terraceSpawn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
             }}
           />
           

@@ -43,7 +43,7 @@ export default function FractionClimbGame() {
 
   // ── Watch for climb-mode win → start transition ────────────────────────────
   useEffect(() => {
-    if (won && gamePhase === 'climb' && heroPos.x > VP_W + 180) {
+    if (won && gamePhase === 'climb' && heroPos.x > VP_W + 400) {
       setGamePhase('transitioning');
     }
   }, [won, gamePhase, heroPos.x]);

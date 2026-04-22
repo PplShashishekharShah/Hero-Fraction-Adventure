@@ -181,7 +181,7 @@ export function useGameLogic() {
                       // NEW: Start victory walk off-screen
                       delay(() => {
                         setHeroState('victory_walk');
-                        setHeroPos({ x: VP_W + 250, y: rooftopPos.y });
+                        setHeroPos({ x: VP_W + 600, y: rooftopPos.y });
                       }, 400);
                     }, 700); // final climb duration
                   }, 600); // final shooting delay
@@ -216,7 +216,7 @@ export function useGameLogic() {
                 setHeroDirection(null);
                 setInputLocked(false);
               }, 1000);
-            }, 1300); // backflip duration
+            }, 800); // backflip duration (reduced further to restrict to 1 play)
           }, 700); // climb duration
 
         } else {

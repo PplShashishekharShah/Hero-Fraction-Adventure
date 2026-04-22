@@ -167,3 +167,9 @@ body {
   80%  { transform: scaleY(0.97) scaleX(1.03); }
   100% { transform: scaleY(1)    scaleX(1); }
 }
+
+/* ─── Final Terrace Spawn ─────────────────────────────────────────────────── */
+/* @keyframes terraceSpawn {
+  from { transform: translateY(-80px); opacity: 0; }
+  to   { transform: translateY(0px);      opacity: 1; }
+} */

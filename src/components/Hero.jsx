@@ -30,6 +30,8 @@ export default function Hero({ x, y, heroState, heroDirection, scale = 1 }) {
   };
 
   const currentImg = getHeroImage();
+  const isBackflip = heroState === 'backflip';
+  const isShootTop = heroDirection === 'top' && heroState === 'shooting';
 
   return (
     <img
@@ -37,18 +39,19 @@ export default function Hero({ x, y, heroState, heroDirection, scale = 1 }) {
       alt="Web Hero"
       style={{
         position:   'absolute',
-        left:       x - 70,       // Adjusted offset for larger size
-        top:        y - 120,      // Adjusted offset for larger size
-        width:      140,          // Enlarged width
-        height:     180,          // Enlarged height
+        left:       x - 75 + (isBackflip ? 0 : 0),
+        top:        y - 125,
+        width:      145, 
+        height:     185,
         objectFit:  'contain',
+
         zIndex:     25,
         // Transition becomes long (2.2s) only during the downward round shift ('idle')
         // to sync with buildings. During 'climbing', 'backflip', or 'falling', it stays fast (0.7s).
         transition: (['climbing', 'backflip', 'falling'].includes(heroState)
           ? 'left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s ease'
           : 'left 2.2s cubic-bezier(0.42, 0, 0.58, 1), top 2.2s cubic-bezier(0.42, 0, 0.58, 1), transform 2.2s ease') + ', filter 0.3s ease',
-        transform: `scale(${scale})`,
+        transform: `scale(${scale * (isShootTop ? 1.25 : 1)})`,
         transformOrigin: 'center center',
         filter:
           heroState === 'falling'
