@@ -70,8 +70,8 @@ export default function HeroRunner({ screenX, screenY, heroPhase, faceDir, walkD
         pointerEvents:   'none',
         imageRendering:  'auto',
         opacity:         heroPhase === 'vanished' ? 0 : 1,
-        // Added opacity transition for vanishing
-        transition:      `${transition}${transition !== 'none' ? ', opacity 0.5s ease' : ''}`,
+        // Removed transform transition as it causes a shrink-then-grow glitch when images swap
+        transition:      `${transition}${transition !== 'none' ? ', opacity 0.5s ease' : ''}${(heroPhase === 'drilling' || heroPhase === 'landing') ? ', transform 0.2s ease-out' : ''}`,
       }}
     />
   );
