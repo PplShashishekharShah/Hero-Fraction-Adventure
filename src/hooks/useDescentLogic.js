@@ -221,10 +221,7 @@ export function useDescentLogic() {
           // ── CORRECT SEQUENCE ─────────────────────────────────────────────
           triggerFeedback('correct');
           
-          const currentFloor = floors.find(f => f.id === floorId);
-          const wasHinted = side === 'left' ? currentFloor.leftState === 'highlight' : currentFloor.rightState === 'highlight';
-          
-          updateTile(floorId, side, wasHinted ? 'correct_hint' : 'correct');
+          updateTile(floorId, side, 'correct');
           setIncorrectAttempts(0);
 
           // Crack the floor
@@ -285,11 +282,8 @@ export function useDescentLogic() {
             visible: true,
           });
 
-          // Highlight correct one if 2 failures
-          if (newAttempts >= 2) {
-            const correctSide = activeFloor.correctSide;
-            updateTile(floorId, correctSide, 'highlight');
-          }
+          // Highlight logic removed as per user request
+
 
           // Resume after a delay
           delay(() => {

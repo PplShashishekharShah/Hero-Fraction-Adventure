@@ -274,7 +274,7 @@ export default function GameViewport({
       {/* ── Transitioning Anchors (Exiting) ── */}
       {exitingAnchors.map(a => (
         <AnchorPad
-          key={`exit-${a.id}`}
+          key={`exit-${roundIndex}-${a.id}`}
           x={a.x}
           y={a.y}
           n={a.n}
@@ -284,12 +284,12 @@ export default function GameViewport({
         />
       ))}
 
-      {/* ── Current Round Anchors (STABLE ID KEY) ── */}
+      {/* ── Current Round Anchors ── */}
       {anchors.map(a => {
         const transitionState = (roundIndex > 0 && a.role === 'lower') ? 'descending' : 'idle';
         return (
           <AnchorPad
-            key={a.id}
+            key={`${roundIndex}-${a.id}`}
             x={a.x}
             y={a.y}
             n={a.n}

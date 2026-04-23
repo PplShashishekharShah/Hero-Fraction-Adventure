@@ -19,63 +19,79 @@ const GLOW = {
 };
 
 /**
- * AnchorPad — bigger anchor with spawn animation and tighter plate gap.
- *
- * Container gets anchorSpawn once (keyed per round in parent).
- * Selectable anchor image floats after spawn completes.
+ * AnchorPad — Restructured to prevent animation restarts on state changes.
+ * 
+ * We use nested divs:
+ * 1. Outer: Handles global entry/exit animations (spawn, descend, exit).
+ * 2. Inner: Handles state-based effects (glow, pulse, floating).
  */
 export default function AnchorPad({ x, y, n, d, state, selectable, onClick }) {
   const img  = ANCHOR_IMG[state] ?? ASSETS.anchorIdle;
   const glow = GLOW[state] ?? (selectable ? GLOW.selectable : null);
 
+  // ENTRY/EXIT animations (Outer container)
+  // These should only change when the round phase changes drastically
+  const outerAnim = 
+    state === 'exiting' 
+      ? 'anchorExitDown 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
+      : state === 'descending'
+      ? 'anchorDescend 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
+      : 'anchorSpawn 2.2s cubic-bezier(0.42, 0, 0.58, 1) both';
+
+  // IDLE/EFFECT animations (Inner container)
+  // These can change without resetting the spawn/descend position
+  const innerAnim = 
+    (state === 'highlight' || state === 'correct_hint')
+      ? 'highlightPulse 1.5s ease-in-out infinite'
+      : selectable
+      ? 'floatAnchor 2.2s ease-in-out infinite'
+      : 'none';
+
   return (
     <div
-      onClick={selectable ? onClick : undefined}
       style={{
-        position:      'absolute',
-        left:          x - 65,
-        top:           y - 36,
-        width:         130,
-        height:        130,
-        display:       'flex',
-        flexDirection: 'column',
-        alignItems:    'center',
-        gap:           0,              // no gap between plate and anchor img
-        cursor:        selectable ? 'pointer' : 'default',
-        userSelect:    'none',
-        zIndex:        20,
-        filter:        glow ? `drop-shadow(${glow})` : 'none',
-        transition:    'filter 0.2s',
-        willChange:    'transform, opacity',
-        /* dynamic animation based on climbing state */
-        animation: 
-          state === 'exiting' 
-            ? 'anchorExitDown 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
-            : state === 'descending'
-            ? 'anchorDescend 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
-            : (state === 'highlight' || state === 'correct_hint')
-            ? 'highlightPulse 1.5s ease-in-out infinite'
-            : selectable
-            ? 'anchorSpawn 2.2s cubic-bezier(0.42, 0, 0.58, 1) both, floatAnchor 2.2s ease-in-out infinite 2.2s'
-            : 'anchorSpawn 2.2s cubic-bezier(0.42, 0, 0.58, 1) both',
+        position:   'absolute',
+        left:       x - 65,
+        top:        y - 36,
+        width:      130,
+        height:     130,
+        zIndex:     20,
+        animation:  outerAnim,
+        pointerEvents: 'none', // Handled by inner
       }}
     >
-      {/* Fraction plate — sits directly above anchor with no gap */}
-      <FractionPlate n={n} d={d} />
-
-      {/* Anchor image — slightly overlaps plate bottom */}
-      <img
-        src={img}
-        alt=""
+      <div
+        onClick={selectable ? onClick : undefined}
         style={{
-          width:      180,
-          height:     180,
-          objectFit:  'contain',
-          marginTop:  -50,   // pulls anchor up to close gap against plate
-          transition: 'transform 0.1s',
-          transform:  selectable ? 'scale(1)' : 'scale(0.95)',
+          width:         '100%',
+          height:        '100%',
+          display:       'flex',
+          flexDirection: 'column',
+          alignItems:    'center',
+          gap:           0,
+          cursor:        selectable ? 'pointer' : 'default',
+          userSelect:    'none',
+          filter:        glow ? `drop-shadow(${glow})` : 'none',
+          transition:    'filter 0.2s',
+          animation:     innerAnim,
+          pointerEvents: 'auto',
         }}
-      />
+      >
+        <FractionPlate n={n} d={d} />
+
+        <img
+          src={img}
+          alt=""
+          style={{
+            width:      180,
+            height:     180,
+            objectFit:  'contain',
+            marginTop:  -50,
+            transition: 'transform 0.1s',
+            transform:  selectable ? 'scale(1)' : 'scale(0.95)',
+          }}
+        />
+      </div>
     </div>
   );
 }

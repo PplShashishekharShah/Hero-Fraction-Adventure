@@ -182,8 +182,7 @@ export function useGameLogic() {
             setFeedback(f => ({ ...f, visible: false }));
           }
           
-          const isHinted = anchorStates[anchorId] === 'highlight';
-          setAnchor(anchorId, isHinted ? 'correct_hint' : 'correct');
+          setAnchor(anchorId, 'correct');
           // setFeedback(f => ({ ...f, visible: false })); // Handled above now
           setHeroPos({ x: anchor.x, y: anchor.y });
 
@@ -279,10 +278,7 @@ export function useGameLogic() {
               setFeedback({ message: msg, type: 'incorrect', visible: true });
               speak(msg);
 
-              // Highlight correct one if 2 failures
-              if (newAttempts >= 2 && other) {
-                setAnchor(other.id, 'highlight');
-              }
+              // Removed highlight correct one if 2 failures logic
 
               delay(() => {
                 setFeedback(f => ({ ...f, visible: false }));
