@@ -22,7 +22,7 @@ const TILE_IMAGES = {
 export default function FractionFloorTile({ fraction, tileState, disabled, onClick }) {
   const [hovered, setHovered] = useState(false);
 
-  const src      = (TILE_IMAGES[tileState] ?? TILE_IMAGES.idle)();
+  const src      = (tileState === 'correct_hint' ? TILE_IMAGES.correct : (TILE_IMAGES[tileState] ?? TILE_IMAGES.idle))();
   const isIdle   = tileState === 'idle';
   const isSelected = tileState === 'selected';
   const isWrong  = tileState === 'wrong';
@@ -33,8 +33,10 @@ export default function FractionFloorTile({ fraction, tileState, disabled, onCli
     ? 'drop-shadow(0 0 10px #ff4444) brightness(1.1)'
     : (isSelected || (hovered && isIdle && !disabled))
     ? 'drop-shadow(0 0 10px #ffe740) brightness(1.15)'
-    : tileState === 'correct'
+    : (tileState === 'correct' || tileState === 'correct_hint')
     ? 'drop-shadow(0 0 10px #1de9b6) brightness(1.1)'
+    : tileState === 'highlight'
+    ? 'drop-shadow(0 0 15px #ffea00) brightness(1.3)'
     : 'none';
 
   return (
@@ -51,7 +53,12 @@ export default function FractionFloorTile({ fraction, tileState, disabled, onCli
         cursor:     (disabled || isBroken) ? 'default' : 'pointer',
         userSelect: 'none',
         // shake on wrong answer (CSS keyframe defined in index.css)
-        animation:  isWrong ? 'tileShake 0.45s ease' : 'none',
+        animation:  
+          isWrong 
+            ? 'tileShake 0.45s ease' 
+            : (tileState === 'highlight' || tileState === 'correct_hint')
+            ? 'highlightPulse 1.5s ease-in-out infinite'
+            : 'none',
         // CSS Highlight for selected state
         border: isSelected ? 'rgba(255, 231, 64, 0.2)' : 'transparent',
         borderRadius: 8,

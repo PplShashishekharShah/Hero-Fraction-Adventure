@@ -168,8 +168,32 @@ body {
   100% { transform: scaleY(1)    scaleX(1); }
 }
 
-/* ─── Final Terrace Spawn ─────────────────────────────────────────────────── */
-/* @keyframes terraceSpawn {
+/* ─── Feedback message pop ─────────────────────────────────────────────────── */
+@keyframes feedbackSlide {
+  0%   { transform: translateX(-50%) translateY(-120%) scale(0.3); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(-30%) scale(0.7);      opacity: 1; }
+}
+
+@keyframes highlightPulse {
+  0%, 100% { filter: drop-shadow(0 0 15px #ffff00cc) brightness(1.1); }
+  50%       { filter: drop-shadow(0 0 45px #ffff00)   brightness(1.8); }
+}
+
+/* ─── Tutorial Animations ─────────────────────────────────────────────────── */
+@keyframes handGuide {
+  0%   { opacity: 0; transform: var(--start-transform) rotate(-20deg) scale(0.6); }
+  25%  { opacity: 1; transform: var(--start-transform) rotate(-20deg) scale(1.1); }
+  70%  { opacity: 1; transform: translate(0, 0) rotate(-20deg) scale(1.1); }
+  85%  { opacity: 1; transform: translate(0, -25px) rotate(-20deg) scale(1.2); }
+  100% { opacity: 1; transform: translate(0, 0) rotate(-20deg) scale(1.1); }
+}
+
+@keyframes tutorialHandLoop {
+  0%, 100% { transform: rotate(-20deg) translateY(0); }
+  50% { transform: rotate(-20deg) translateY(-25px); }
+}
+
+@keyframes terraceSpawn {
   from { transform: translateY(-80px); opacity: 0; }
   to   { transform: translateY(0px);      opacity: 1; }
-} */
+}

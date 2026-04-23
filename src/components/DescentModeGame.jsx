@@ -109,28 +109,34 @@ export default function DescentModeGame({ onClimbAgain }) {
           }}
         />
 
-        {/* ── Mode badge ── */}
-        <div
-          style={{
-            position:      'absolute',
-            top:           12,
-            left:          '50%',
-            transform:     'translateX(-50%)',
-            background:    'linear-gradient(135deg, #3d0d3a, #1a0030)',
-            border:        '1px solid #e040fb88',
-            borderRadius:  20,
-            padding:       '3px 16px',
-            fontSize:      11,
-            fontWeight:    800,
+        {/* ── Feedback message (Replaces mode badge) ── */}
+        {feedback.visible && (
+          <div
+            style={{
+              position:      'absolute',
+              top:           20,
+              left:          '50%',
+              transform:     'translateX(-50%)',
+            background:    'rgba(30, 0, 50, 0.9)',
+            backdropFilter: 'blur(10px)',
+            border:        '2px solid #e040fb',
+            borderRadius:  16,
+            padding:       '12px 32px',
+            fontSize:      18,
+            fontWeight:    900,
             color:         '#f48fb1',
-            zIndex:        40,
-            letterSpacing: 1,
+            zIndex:        120, // above foreground
+            boxShadow:     '0 0 30px rgba(224, 64, 251, 0.3)',
+            animation:     'feedbackSlide 0.5s ease-out forwards',
+            whiteSpace:    'nowrap',
+            letterSpacing: '0.5px',
             textTransform: 'uppercase',
-            boxShadow:     '0 0 12px #e040fb44',
           }}
         >
-          ⬇️ DESCENT MODE
+          <span style={{ marginRight: 8 }}>⚠️</span>
+          {feedback.message}
         </div>
+      )}
 
         {/* ── Layer 1: Floor Backgrounds (Base + Tiles) ─────────────────────── */}
         {floors.map(floor => {

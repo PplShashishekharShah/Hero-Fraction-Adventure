@@ -80,6 +80,8 @@ export function useDescentLogic() {
   const [feedback,    setFeedback]    = useState({ message: '', visible: false });
   const [flashStatus, setFlashStatus] = useState(null); // 'correct'|'incorrect'|null
 
+  const [incorrectAttempts, setIncorrectAttempts] = useState(0);
+
   // ── Timeout registry (clean up all on unmount) ───────────────────────────
   const timeouts = useRef([]);
   const delay = useCallback((fn, ms) => {
@@ -163,7 +165,7 @@ export function useDescentLogic() {
        };
     } else {
        newFloor = makeFloor(roundIndex);
-    }
+     }
 
     if (!newFloor) return;
     setFloors(prev =>
@@ -218,7 +220,12 @@ export function useDescentLogic() {
         if (isCorrect) {
           // ── CORRECT SEQUENCE ─────────────────────────────────────────────
           triggerFeedback('correct');
-          updateTile(floorId, side, 'correct');
+          
+          const currentFloor = floors.find(f => f.id === floorId);
+          const wasHinted = side === 'left' ? currentFloor.leftState === 'highlight' : currentFloor.rightState === 'highlight';
+          
+          updateTile(floorId, side, wasHinted ? 'correct_hint' : 'correct');
+          setIncorrectAttempts(0);
 
           // Crack the floor
           delay(() => updateTile(floorId, side, 'crack'), GAME_CONFIG.correctStateMs);
@@ -269,11 +276,20 @@ export function useDescentLogic() {
           triggerFeedback('incorrect');
           updateTile(floorId, side, 'wrong');
           
-          const clicked = side === 'left' ? activeFloor.leftFraction : activeFloor.rightFraction;
+          const newAttempts = incorrectAttempts + 1;
+          setIncorrectAttempts(newAttempts);
+
           setFeedback({
-            message: `Oops! ${clicked.numerator}/${clicked.denominator} is LARGER. Pick the smaller one!`,
+            message: `Oops! Pick the smaller fraction!`,
+            type:    'incorrect',
             visible: true,
           });
+
+          // Highlight correct one if 2 failures
+          if (newAttempts >= 2) {
+            const correctSide = activeFloor.correctSide;
+            updateTile(floorId, correctSide, 'highlight');
+          }
 
           // Resume after a delay
           delay(() => {
@@ -289,7 +305,7 @@ export function useDescentLogic() {
 
   }, [
     inputLocked, descentComplete, activeFloorId, floors, dropCount, heroWorldX,
-    updateTile, triggerFeedback, spawnFloor, delay,
+    updateTile, triggerFeedback, spawnFloor, delay, incorrectAttempts
   ]);
 
   // ── Reset ─────────────────────────────────────────────────────────────────

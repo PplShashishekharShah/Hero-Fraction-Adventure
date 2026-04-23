@@ -3,16 +3,19 @@ import FractionPlate from './FractionPlate';
 
 const ANCHOR_IMG = {
   idle:    ASSETS.anchorIdle,
-  correct: ASSETS.anchorCorrect,
-  wrong:   ASSETS.anchorWrong,
-  break:   ASSETS.anchorBreak,
+  correct:      ASSETS.anchorCorrect,
+  correct_hint: ASSETS.anchorCorrect,
+  wrong:        ASSETS.anchorWrong,
+  break:        ASSETS.anchorBreak,
 };
 
 const GLOW = {
   correct:    '0 0 24px 8px #00ff9966',
   wrong:      '0 0 24px 8px #ff330066',
   break:      '0 0 18px 5px #ff000044',
-  selectable: '0 0 18px 6px #4cf4ff55',
+  selectable:   '0 0 18px 6px #4cf4ff55',
+  highlight:    '0 0 40px 20px #ffff00', 
+  correct_hint: '0 0 40px 20px #ffff00', 
 };
 
 /**
@@ -50,6 +53,8 @@ export default function AnchorPad({ x, y, n, d, state, selectable, onClick }) {
             ? 'anchorExitDown 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
             : state === 'descending'
             ? 'anchorDescend 2.2s cubic-bezier(0.42, 0, 0.58, 1) forwards'
+            : (state === 'highlight' || state === 'correct_hint')
+            ? 'highlightPulse 1.5s ease-in-out infinite'
             : selectable
             ? 'anchorSpawn 2.2s cubic-bezier(0.42, 0, 0.58, 1) both, floatAnchor 2.2s ease-in-out infinite 2.2s'
             : 'anchorSpawn 2.2s cubic-bezier(0.42, 0, 0.58, 1) both',

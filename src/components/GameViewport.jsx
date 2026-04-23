@@ -178,27 +178,95 @@ export default function GameViewport({
         </div>
       )}
 
-      {/* ── Mode badge ── */}
-      <div
-        style={{
-          position:      'absolute',
-          top:           12,
-          left:          '50%',
-          transform:     'translateX(-50%)',
-          background:    round.mode === 'intro' ? '#0d3d5a' : '#0d3a1a',
-          border:        `1px solid ${round.mode === 'intro' ? '#1de9b644' : '#1de9b6'}`,
-          borderRadius:  20,
-          padding:       '3px 14px',
-          fontSize:      11,
-          fontWeight:    800,
-          color:         round.mode === 'intro' ? '#7ee8ff' : '#1de9b6',
-          zIndex:        40,
-          letterSpacing: 1,
-          textTransform: 'uppercase',
-        }}
-      >
-        {round.mode === 'intro' ? 'INTRO MODE' : 'CLIMB MODE'}
-      </div>
+      {/* ── Tutorial Spotlight Overlay ── */}
+      {feedback.visible && feedback.type === 'tutorial' && (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              inset: -2000,
+              zIndex: 80,
+              background: 'radial-gradient(circle 200px at var(--spot-x, 50%) var(--spot-y, 50%), transparent 0%, rgba(0,0,0,0.8) 100%)',
+              pointerEvents: 'none',
+              transition: 'opacity 0.6s ease',
+            }}
+            ref={(el) => {
+              if (el) {
+                const correctAnchor = anchors.find(a => 
+                  roundIndex === 0 ? (a.id === 'left') : false 
+                );
+                if (correctAnchor) {
+                  el.style.setProperty('--spot-x', `${correctAnchor.x}px`);
+                  el.style.setProperty('--spot-y', `${correctAnchor.y}px`);
+                }
+              }
+            }}
+          />
+          
+          {/* Moving Hand Tutorial Animation (☝️ with tilt) */}
+          <div
+            style={{
+              position: 'absolute',
+              zIndex: 100,
+              fontSize: '80px',
+              pointerEvents: 'none',
+              animation: 'handGuide 3s ease-in-out forwards',
+            }}
+            ref={(el) => {
+              if (el) {
+                const correctAnchor = anchors.find(a => roundIndex === 0 ? a.id === 'left' : false);
+                if (correctAnchor) {
+                  el.style.left = `${correctAnchor.x - 30}px`;
+                  el.style.top = `${correctAnchor.y + 70}px`;
+                  
+                  const heroHeadX = heroPos.x;
+                  const heroHeadY = heroPos.y - 80;
+                  const dx = heroHeadX - (correctAnchor.x - 30 + 40); 
+                  const dy = heroHeadY - (correctAnchor.y + 70 + 40);
+                  el.style.setProperty('--start-transform', `translate(${dx}px, ${dy}px)`);
+                }
+              }
+            }}
+          >
+            ☝️
+          </div>
+        </>
+      )}
+
+      {/* ── Feedback message ── */}
+      {feedback.visible && (
+        <div
+          style={{
+            position:      'absolute',
+            top:           20,
+            left:          '50%',
+            transform:     'translateX(-50%)',
+            background:    feedback.type === 'tutorial' 
+              ? 'rgba(0, 80, 120, 0.9)' 
+              : feedback.type === 'correct' 
+              ? 'rgba(0, 40, 30, 0.9)' 
+              : 'rgba(40, 10, 0, 0.9)',
+            backdropFilter: 'blur(10px)',
+            border:        `2px solid ${feedback.type === 'tutorial' ? '#4cf4ff' : (feedback.type === 'correct' ? '#1de9b6' : '#ff4444')}`,
+            borderRadius:  16,
+            padding:       '12px 32px',
+            fontSize:      18,
+            fontWeight:    900,
+            color:         feedback.type === 'tutorial' ? '#4cf4ff' : (feedback.type === 'correct' ? '#1de9b6' : '#ff8888'),
+            zIndex:        100,
+            boxShadow:     `0 0 30px ${feedback.type === 'tutorial' ? 'rgba(76, 244, 255, 0.3)' : (feedback.type === 'correct' ? 'rgba(29, 233, 182, 0.3)' : 'rgba(255, 68, 68, 0.3)')}`,
+            animation:     'feedbackSlide 0.5s ease-out forwards',
+            whiteSpace:    'nowrap',
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase',
+          }}
+        >
+          <span style={{ marginRight: 8 }}>
+            {feedback.type === 'tutorial' ? '💡' : (feedback.type === 'correct' ? '🕸️' : '⚠️')}
+          </span>
+          {feedback.message}
+        </div>
+      )}
 
       {/* ── Web line ── */}
       <WebLine start={heroPos} end={weblineEnd} visible={weblineVisible} />
@@ -206,7 +274,7 @@ export default function GameViewport({
       {/* ── Transitioning Anchors (Exiting) ── */}
       {exitingAnchors.map(a => (
         <AnchorPad
-          key={`exit-${a.id}-${roundIndex}`}
+          key={`exit-${a.id}`}
           x={a.x}
           y={a.y}
           n={a.n}
@@ -216,14 +284,12 @@ export default function GameViewport({
         />
       ))}
 
-      {/* ── Current Round Anchors ── */}
+      {/* ── Current Round Anchors (STABLE ID KEY) ── */}
       {anchors.map(a => {
-        // Lower anchors arrive by "descending" from upper row (except first round)
         const transitionState = (roundIndex > 0 && a.role === 'lower') ? 'descending' : 'idle';
-        
         return (
           <AnchorPad
-            key={`${roundIndex}-${a.id}`}
+            key={a.id}
             x={a.x}
             y={a.y}
             n={a.n}

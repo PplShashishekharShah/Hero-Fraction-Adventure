@@ -31,6 +31,8 @@ export function useGameLogic() {
   const [heroDirection,  setHeroDirection]  = useState(null); // 'left' | 'right' | 'top' | null
   const [heroScale,      setHeroScale]      = useState(1);
 
+  const [incorrectAttempts, setIncorrectAttempts] = useState(0);
+
   // ── Timeout registry ──────────────────────────────────────────────────────
   const timeouts = useRef([]);
   const delay = useCallback((fn, ms) => {
@@ -59,6 +61,16 @@ export function useGameLogic() {
       navigator.vibrate(type === 'correct' ? 100 : [100, 50, 200]);
     }
   }, [delay]);
+
+  // ── Voice Synthesis ───────────────────────────────────────────────────────
+  const speak = useCallback((text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.1; 
+    window.speechSynthesis.speak(utterance);
+  }, []);
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const round = ROUNDS[roundIndex] ?? ROUNDS[ROUNDS.length - 1];
@@ -98,13 +110,33 @@ export function useGameLogic() {
     setInputLocked(false);
     setWeblineVisible(false);
     setWeblineEnd(null);
-    setFeedback({ message: '', type: 'correct', visible: false });
+    setFeedback({ message: '', type: 'incorrect', visible: false });
     setAnchorStates({});
     setWon(false);
     setScrollKey(0);
     setFlashStatus(null);
     setHeroScale(1);
-  }, []);
+    setIncorrectAttempts(0);
+
+    // Tutorial: Highlight correct anchor immediately in Intro mode
+    if (ROUNDS[roundIndex]?.mode === 'intro') {
+      setAnchorStates({ [ROUNDS[roundIndex].correctId]: 'highlight' });
+    }
+  }, [roundIndex]);
+  
+  // ── Tutorial Logic for Intro Mode ───────────────────────────────────────
+  useEffect(() => {
+    if (round.mode === 'intro' && !inputLocked && !won) {
+      const sideText = round.correctId === 'left' ? 'LEFT' : 'RIGHT';
+      const msg = `Tap the ${sideText} anchor to climb!`;
+      setFeedback({
+        message: msg,
+        type:    'tutorial',
+        visible: true,
+      });
+      speak(msg);
+    }
+  }, [roundIndex, won, inputLocked, round.mode, round.correctId, speak]);
 
   // ── Anchor click ──────────────────────────────────────────────────────────
   const handleAnchorClick = useCallback(
@@ -128,10 +160,8 @@ export function useGameLogic() {
       else if (anchor.x < heroPos.x)           setHeroDirection('left');
       else                                     setHeroDirection('right');
 
-      const selFrac    = `${anchor.n}/${anchor.d}`;
       const allOptions = anchors.filter(a => a.selectable);
       const other      = allOptions.find(o => o.id !== anchorId);
-      const otherFrac = other ? `${other.n}/${other.d}` : '';
 
       // Step 1 — shoot web
       setHeroState('shooting');
@@ -143,8 +173,18 @@ export function useGameLogic() {
         setHeroState('climbing');
 
         if (isCorrect) {
-          triggerFeedback('correct');
-          setAnchor(anchorId, 'correct');
+          // Success! 
+          if (round.mode === 'intro') {
+            const msg = `Great, now help hero to climb building!`;
+            setFeedback({ message: msg, type: 'tutorial', visible: true });
+            speak(msg);
+          } else {
+            setFeedback(f => ({ ...f, visible: false }));
+          }
+          
+          const isHinted = anchorStates[anchorId] === 'highlight';
+          setAnchor(anchorId, isHinted ? 'correct_hint' : 'correct');
+          // setFeedback(f => ({ ...f, visible: false })); // Handled above now
           setHeroPos({ x: anchor.x, y: anchor.y });
 
           delay(() => {
@@ -157,6 +197,7 @@ export function useGameLogic() {
               const newProgress = progress + 1;
               setProgress(newProgress);
               setAnchorStates({});
+              setIncorrectAttempts(0);
 
               if (newProgress >= TOTAL_CLIMBS) {
                 // FINAL Rooftop Climax: Automatically jump to right rooftop
@@ -177,6 +218,7 @@ export function useGameLogic() {
                     delay(() => {
                       setInputLocked(false);
                       setWon(true); 
+                      // Removed: MISSION COMPLETE feedback
 
                       // NEW: Start victory walk off-screen
                       delay(() => {
@@ -191,11 +233,7 @@ export function useGameLogic() {
 
               // Normal round transition — directly into stagnant idle/celebrate after backflip
               setHeroState('idle');
-              setFeedback({
-                message: `Great! ${selFrac} is greater than ${otherFrac}.`,
-                type:    'correct',
-                visible: true,
-              });
+              // REMOVED: setFeedback({ message: `Correct!`, type: 'correct', visible: true });
 
               delay(() => {
                 setFeedback(f => ({ ...f, visible: false }));
@@ -227,6 +265,9 @@ export function useGameLogic() {
           setAnchor(anchorId, 'wrong');
           setHeroPos({ x: midX, y: midY });
 
+          const newAttempts = incorrectAttempts + 1;
+          setIncorrectAttempts(newAttempts);
+
           delay(() => {
             setAnchor(anchorId, 'break');
 
@@ -234,11 +275,14 @@ export function useGameLogic() {
               setHeroState('falling');
               setWeblineVisible(false);
               setHeroPos({ x: safePos.x, y: safePos.y });
-              setFeedback({
-                message: `Oops! ${selFrac} is smaller. Try again!`,
-                type:    'wrong',
-                visible: true,
-              });
+              const msg = `Oops! Pick the larger fraction!`;
+              setFeedback({ message: msg, type: 'incorrect', visible: true });
+              speak(msg);
+
+              // Highlight correct one if 2 failures
+              if (newAttempts >= 2 && other) {
+                setAnchor(other.id, 'highlight');
+              }
 
               delay(() => {
                 setFeedback(f => ({ ...f, visible: false }));
@@ -253,7 +297,7 @@ export function useGameLogic() {
       }, 500);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [inputLocked, won, anchors, round, progress, roundIndex, heroPos, safePos, triggerFeedback]
+    [inputLocked, won, anchors, round, progress, roundIndex, heroPos, safePos, triggerFeedback, incorrectAttempts]
   );
 
   // ── Derived UI values ─────────────────────────────────────────────────────
