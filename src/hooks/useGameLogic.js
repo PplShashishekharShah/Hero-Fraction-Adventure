@@ -63,12 +63,16 @@ export function useGameLogic() {
   }, [delay]);
 
   // ── Voice Synthesis ───────────────────────────────────────────────────────
-  const speak = useCallback((text) => {
-    if (!window.speechSynthesis) return;
+  const speak = useCallback((text, onEnd) => {
+    if (!window.speechSynthesis) {
+       if (onEnd) onEnd();
+       return;
+    }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
     utterance.pitch = 1.1; 
+    if (onEnd) utterance.onend = onEnd;
     window.speechSynthesis.speak(utterance);
   }, []);
 
@@ -178,7 +182,9 @@ export function useGameLogic() {
             const msg = `Great, now help hero to climb building!`;
             setFeedback({ message: msg, type: 'tutorial', visible: true });
             speak(msg);
+            // Tutorial message stays visible in intro round until transition
           } else {
+            // No message logic for normal success as per previous requirement
             setFeedback(f => ({ ...f, visible: false }));
           }
           
@@ -276,12 +282,17 @@ export function useGameLogic() {
               setHeroPos({ x: safePos.x, y: safePos.y });
               const msg = `Oops! Pick the larger fraction!`;
               setFeedback({ message: msg, type: 'incorrect', visible: true });
-              speak(msg);
+              speak(msg, () => {
+                delay(() => setFeedback(f => ({ ...f, visible: false })), 600);
+              });
 
-              // Removed highlight correct one if 2 failures logic
+              const allOptions = anchors.filter(a => a.selectable);
+              const other      = allOptions.find(o => o.id !== anchorId);
+              if (newAttempts >= 2 && other) {
+                setAnchor(other.id, 'highlight');
+              }
 
               delay(() => {
-                setFeedback(f => ({ ...f, visible: false }));
                 setAnchor(anchorId, 'idle');
                 setHeroState('idle');
                 setHeroDirection(null);

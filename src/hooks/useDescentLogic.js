@@ -149,6 +149,20 @@ export function useDescentLogic() {
     delay(() => setFlashStatus(null), 900);
   }, [delay]);
 
+  // ── Voice Synthesis ───────────────────────────────────────────────────────
+  const speak = useCallback((text, onEnd) => {
+    if (!window.speechSynthesis) {
+       if (onEnd) onEnd();
+       return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0; 
+    if (onEnd) utterance.onend = onEnd;
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
   /** Append a new floor to the floors array (idempotent — skips if already there). */
   const spawnFloor = useCallback((roundIndex) => {
     // If roundIndex is TOTAL_DESCENT_DROPS, it's the blank final landing floor
@@ -276,19 +290,22 @@ export function useDescentLogic() {
           const newAttempts = incorrectAttempts + 1;
           setIncorrectAttempts(newAttempts);
 
-          setFeedback({
-            message: `Oops! Pick the smaller fraction!`,
-            type:    'incorrect',
-            visible: true,
+          const msg = `Oops! Pick the smaller fraction!`;
+          setFeedback({ message: msg, type: 'incorrect', visible: true });
+          speak(msg, () => {
+            delay(() => setFeedback(f => ({ ...f, visible: false })), 600);
           });
 
-          // Highlight logic removed as per user request
+          if (newAttempts >= 2) {
+            const activeFloor = floors.find(f => f.id === floorId);
+            const correctSide = activeFloor.correctSide;
+            updateTile(floorId, correctSide, 'highlight');
+          }
 
 
           // Resume after a delay
           delay(() => {
             updateTile(floorId, side, 'idle');
-            setFeedback(f => ({ ...f, visible: false }));
             setHeroPhase('walking');
             setInputLocked(false);
           }, GAME_CONFIG.wrongStateMs);

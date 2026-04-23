@@ -178,58 +178,50 @@ export default function GameViewport({
         </div>
       )}
 
-      {/* ── Tutorial Spotlight Overlay ── */}
-      {feedback.visible && feedback.type === 'tutorial' && (
+      {/* ── Tutorial Spotlight Overlay (Intro Round Persistence) ── */}
+      {(feedback.visible && feedback.type === 'tutorial' || (roundIndex === 0 && !won)) && (
         <>
           <div
             style={{
               position: 'absolute',
               inset: -2000,
               zIndex: 80,
-              background: 'radial-gradient(circle 200px at var(--spot-x, 50%) var(--spot-y, 50%), transparent 0%, rgba(0,0,0,0.8) 100%)',
+              // Larger centered circle focusing on both pads and hero
+              background: 'radial-gradient(circle 420px at 50% 50%, transparent 0%, rgba(0,0,0,0.6) 100%)',
               pointerEvents: 'none',
               transition: 'opacity 0.6s ease',
             }}
-            ref={(el) => {
-              if (el) {
-                const correctAnchor = anchors.find(a => 
-                  roundIndex === 0 ? (a.id === 'left') : false 
-                );
-                if (correctAnchor) {
-                  el.style.setProperty('--spot-x', `${correctAnchor.x}px`);
-                  el.style.setProperty('--spot-y', `${correctAnchor.y}px`);
-                }
-              }
-            }}
           />
           
-          {/* Moving Hand Tutorial Animation (☝️ with tilt) */}
-          <div
-            style={{
-              position: 'absolute',
-              zIndex: 100,
-              fontSize: '80px',
-              pointerEvents: 'none',
-              animation: 'handGuide 3s ease-in-out forwards',
-            }}
-            ref={(el) => {
-              if (el) {
-                const correctAnchor = anchors.find(a => roundIndex === 0 ? a.id === 'left' : false);
-                if (correctAnchor) {
-                  el.style.left = `${correctAnchor.x - 30}px`;
-                  el.style.top = `${correctAnchor.y + 70}px`;
-                  
-                  const heroHeadX = heroPos.x;
-                  const heroHeadY = heroPos.y - 80;
-                  const dx = heroHeadX - (correctAnchor.x - 30 + 40); 
-                  const dy = heroHeadY - (correctAnchor.y + 70 + 40);
-                  el.style.setProperty('--start-transform', `translate(${dx}px, ${dy}px)`);
+          {/* Moving Hand Tutorial Animation (☝️ with tilt) - only if feedback is tutorial-type */}
+          {feedback.visible && feedback.type === 'tutorial' && !inputLocked && (
+            <div
+              style={{
+                position: 'absolute',
+                zIndex: 100,
+                fontSize: '80px',
+                pointerEvents: 'none',
+                animation: 'handGuide 3s ease-in-out forwards',
+              }}
+              ref={(el) => {
+                if (el) {
+                  const correctAnchor = anchors.find(a => roundIndex === 0 ? a.id === 'left' : false);
+                  if (correctAnchor) {
+                    el.style.left = `${correctAnchor.x - 30}px`;
+                    el.style.top = `${correctAnchor.y + 70}px`;
+                    
+                    const heroHeadX = heroPos.x;
+                    const heroHeadY = heroPos.y - 80;
+                    const dx = heroHeadX - (correctAnchor.x - 30 + 40); 
+                    const dy = heroHeadY - (correctAnchor.y + 70 + 40);
+                    el.style.setProperty('--start-transform', `translate(${dx}px, ${dy}px)`);
+                  }
                 }
-              }
-            }}
-          >
-            ☝️
-          </div>
+              }}
+            >
+              ☝️
+            </div>
+          )}
         </>
       )}
 
