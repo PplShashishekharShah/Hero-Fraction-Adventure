@@ -261,6 +261,11 @@ export function useDescentLogic() {
                   // End sequence
                   setDropCount(nextDrop);
                   setHeroPhase('exiting');
+                  
+                  const winSfx = new Audio(ASSETS.sfxWin);
+                  winSfx.volume = 0.6;
+                  winSfx.play().catch(() => {});
+
                   setHeroFaceDir('right');
                   setHeroWorldX(VP_W + 200);
                   delay(() => setHeroPhase('vanished'), 1200);

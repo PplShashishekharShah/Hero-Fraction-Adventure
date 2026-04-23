@@ -14,7 +14,7 @@ import {
  * useGameLogic — all game state + action handlers.
  * Returns everything the UI needs.
  */
-export function useGameLogic() {
+export function useGameLogic(isReady = true) {
   const [roundIndex,     setRoundIndex]     = useState(0);
   const [progress,       setProgress]       = useState(0);
   const [heroState,      setHeroState]      = useState('idle');
@@ -130,7 +130,8 @@ export function useGameLogic() {
   
   // ── Tutorial Logic for Intro Mode ───────────────────────────────────────
   useEffect(() => {
-    if (round.mode === 'intro' && !inputLocked && !won) {
+    // Only show guidance if ready, not in backflip/falling, and NOT currently showing a specific feedback (like Oops!)
+    if (isReady && round.mode === 'intro' && !inputLocked && !won && !feedback.visible) {
       const sideText = round.correctId === 'left' ? 'LEFT' : 'RIGHT';
       const msg = `Tap the ${sideText} anchor to climb!`;
       setFeedback({
@@ -139,8 +140,9 @@ export function useGameLogic() {
         visible: true,
       });
       speak(msg);
+      // Tutorial message stays visible in intro round until transition
     }
-  }, [roundIndex, won, inputLocked, round.mode, round.correctId, speak]);
+  }, [roundIndex, won, inputLocked, round.mode, round.correctId, speak, isReady, feedback.visible]);
 
   // ── Anchor click ──────────────────────────────────────────────────────────
   const handleAnchorClick = useCallback(
@@ -178,11 +180,14 @@ export function useGameLogic() {
 
         if (isCorrect) {
           // Success! 
+          triggerFeedback('correct');
           if (round.mode === 'intro') {
             const msg = `Great, now help hero to climb building!`;
             setFeedback({ message: msg, type: 'tutorial', visible: true });
-            speak(msg);
-            // Tutorial message stays visible in intro round until transition
+            speak(msg, () => {
+              delay(() => setFeedback(f => ({ ...f, visible: false })), 1000);
+            });
+            // Tutorial message stays visible in intro round until voice finishes
           } else {
             // No message logic for normal success as per previous requirement
             setFeedback(f => ({ ...f, visible: false }));

@@ -199,27 +199,28 @@ export default function GameViewport({
               style={{
                 position: 'absolute',
                 zIndex: 100,
-                fontSize: '80px',
+                fontSize: '50px',
                 pointerEvents: 'none',
                 animation: 'handGuide 3s ease-in-out forwards',
+                transform: 'rotate(180deg)',
               }}
               ref={(el) => {
                 if (el) {
                   const correctAnchor = anchors.find(a => roundIndex === 0 ? a.id === 'left' : false);
                   if (correctAnchor) {
-                    el.style.left = `${correctAnchor.x - 30}px`;
-                    el.style.top = `${correctAnchor.y + 70}px`;
+                    el.style.left = `${correctAnchor.x + 20}px`;
+                    el.style.top = `${correctAnchor.y - 20}px`;
                     
                     const heroHeadX = heroPos.x;
                     const heroHeadY = heroPos.y - 80;
-                    const dx = heroHeadX - (correctAnchor.x - 30 + 40); 
-                    const dy = heroHeadY - (correctAnchor.y + 70 + 40);
+                    const dx = heroHeadX - (correctAnchor.x - 30 + 70); 
+                    const dy = heroHeadY - (correctAnchor.y + 70 + 10);
                     el.style.setProperty('--start-transform', `translate(${dx}px, ${dy}px)`);
                   }
                 }
               }}
             >
-              ☝️
+              👈
             </div>
           )}
         </>

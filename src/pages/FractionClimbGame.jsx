@@ -30,7 +30,7 @@ export default function FractionClimbGame() {
   // 'climb' | 'transitioning' | 'descent'
 
   // ── Climb mode logic (always mounted so state survives transition) ─────────
-  const climbLogic = useGameLogic();
+  const climbLogic = useGameLogic(isLoaded);
 
   const {
     round, roundIndex, anchors, anchorStates,

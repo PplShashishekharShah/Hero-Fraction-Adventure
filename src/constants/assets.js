@@ -23,6 +23,7 @@ export const ASSETS = {
   rightSky:        '/assets/right_sky.png',
   sfxCorrect:      '/assets/correct.wav',
   sfxIncorrect:    '/assets/incorrect.wav',
+  sfxWin:          '/assets/game_complete.wav',
 
   // ── Descent Mode (Mode 2) ──────────────────────────────────────────────
   interiorBg:      '/assets/interior_building_bg2.png',
